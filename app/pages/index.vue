@@ -20,5 +20,4 @@ const logout = async () => {
         authStore.$reset
     
 }
-
 </script>

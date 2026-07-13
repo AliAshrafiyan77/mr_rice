@@ -29,10 +29,21 @@ export const useAuth = () => {
         })
     }
 
+    const loginWithPassword = async (payload) => {
+    
+        await csrf();
+
+        return $api('/api/login/password', {
+            method: 'POST',
+            body: payload
+        })
+    }
+
     return {
         register,
         verifyOtp,
         user,
         logout,
+        loginWithPassword
     }
 }
