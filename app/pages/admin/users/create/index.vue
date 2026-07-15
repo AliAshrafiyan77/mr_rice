@@ -1,5 +1,5 @@
 <template>
-    <div>adminsdsd dashboard</div>
+    <div>admin users create</div>
 </template>
 
 <script setup>

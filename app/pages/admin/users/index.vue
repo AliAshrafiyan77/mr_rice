@@ -1,5 +1,5 @@
 <template>
-    <div>adminsdsd dashboard</div>
+    <div>admin users index</div>
 </template>
 
 <script setup>
