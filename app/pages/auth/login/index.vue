@@ -5,7 +5,7 @@
             <div class="border border-primary-700 rounded-lg shadow-primary-300 shadow-lg py-4 px-8 w-full">
                 <p class="text-center text-primary-700 text-xl">ورود به حساب کاربری<strong>مستر رایس</strong></p>
                 <div>
-                    
+
                     <div class="mb-4">
                         <label for="mobile" class="block text-primary-700 text-sm font-bold mb-2">
                             موبایل
@@ -20,7 +20,7 @@
                         <input type="password" v-model="form.password" id="password" dir="auto"
                             class="shadow appearance-none border border-primary-700 rounded w-full py-2 px-3 text-text leading-tight focus:outline-none focus:shadow-outline">
                     </div>
-                    
+
                     <div class="flex items-center justify-center">
                         <button type="button" @click="login"
                             class="bg-primary-500 hover:bg-primary-700 text-white transition-colors duration-300 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
@@ -35,7 +35,9 @@
 
 <script setup>
 import { useAuth } from '@/composables/useAuth';
+import { useAuthStore } from '#imports';
 
+const authStore = useAuthStore();
 const auth = useAuth();
 
 const form = reactive({
@@ -49,7 +51,7 @@ const login = async () => {
 
 
     if (response.status) {
-
+        authStore.user = response.user;
         navigateTo('/')
     }
 }

@@ -1,15 +1,20 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
-export const useAuthStore = defineStore('auth', () => {
-  const user = ref(null)
-  const isAuthenticated = computed(() => !!user.value)
+export const useAuthStore = defineStore("auth", () => {
+  const user = ref(null);
+  const isAuthenticated = computed(() => !!user.value);
 
   function setUser(data) {
-    user.value = data
+    user.value = data;
   }
 
   function logout() {
-    user.value = null
+    user.value = null;
+  }
+
+  function reset() {
+    user.value = null;
+    isAuthenticated.value = false;
   }
 
   return {
@@ -17,5 +22,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     setUser,
     logout,
-  }
-})
+    reset
+  };
+});
