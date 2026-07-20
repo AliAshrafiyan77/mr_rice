@@ -1,10 +1,7 @@
 <template>
     <!-- Hamburger button -->
-    <button
-        v-if="showButton"
-        class="lg:hidden fixed top-4 right-4 z-50 p-2 -mt-1"
-        @click="openMenu">
-        <MenuIcon class="w-6 h-6 text-text"/>
+    <button v-if="showButton" class="lg:hidden fixed top-4 right-4 z-50 p-2 -mt-1" @click="openMenu">
+        <MenuIcon class="w-6 h-6 text-text" />
     </button>
 
     <!-- Backdrop overlay -->
@@ -17,39 +14,46 @@
         <div class="px-4 py-5 border-b border-white/10 flex items-center justify-between">
             <h1 class="text-white font-bold text-lg">پنل مدیریت</h1>
             <button @click="closeMenu" class="lg:hidden p-2 rounded-lg">
-                <CloseIcon class="w-6 h-6 text-white"/>
+                <CloseIcon class="w-6 h-6 text-white" />
             </button>
         </div>
 
         <ul class="p-3 space-y-1">
             <li>
-                <NuxtLink
-                    to="/admin"
-                    active-class="bg-primary-600 text-white"
-                    class="block px-4 py-2.5 rounded-lg text-primary-100 text-sm font-medium hover:bg-primary-600 hover:text-white transition-colors"
-                >
+                <NuxtLink to="/admin" active-class="bg-primary-600 text-white"
+                    class="block px-4 py-2.5 rounded-lg text-primary-100 text-sm font-medium hover:bg-primary-600 hover:text-white transition-colors">
                     داشبورد
                 </NuxtLink>
             </li>
 
             <Submenu title="کاربران" base-path="/admin/users">
                 <li>
-                    <NuxtLink
-                        to="/admin/users"
-                        active-class="bg-primary-600 text-white"
+                    <NuxtLink to="/admin/users" active-class="bg-primary-600 text-white"
                         exact-active-class="bg-primary-600 text-white"
-                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors"
-                    >
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
                         لیست کاربران
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink
-                        to="/admin/users/create"
-                        active-class="bg-primary-600 text-white"
-                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors"
-                    >
+                    <NuxtLink to="/admin/users/create" active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
                         افزودن کاربر جدید
+                    </NuxtLink>
+                </li>
+            </Submenu>
+
+            <Submenu title="سطوح دسترسی" base-path="/admin/roles">
+                <li>
+                    <NuxtLink to="/admin/roles" active-class="bg-primary-600 text-white"
+                        exact-active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        لیست نقش ها 
+                    </NuxtLink>
+                </li>
+                <li>
+                    <NuxtLink to="/admin/roles/create" active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        افزودن نقش جدید
                     </NuxtLink>
                 </li>
             </Submenu>
