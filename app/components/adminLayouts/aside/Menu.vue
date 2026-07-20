@@ -16,25 +16,41 @@
         :class="isOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
         <div class="px-4 py-5 border-b border-white/10 flex items-center justify-between">
             <h1 class="text-white font-bold text-lg">پنل مدیریت</h1>
-            <button @click="closeMenu" class="lg:hidden  p-2 rounded-lg ">
+            <button @click="closeMenu" class="lg:hidden p-2 rounded-lg">
                 <CloseIcon class="w-6 h-6 text-white"/>
             </button>
         </div>
 
         <ul class="p-3 space-y-1">
-            <li
-                class="px-4 py-2.5 rounded-lg text-primary-100 text-sm font-medium cursor-pointer hover:bg-primary-600 transition-colors">
-                <NuxtLink to="/admin">داشبورد</NuxtLink>
+            <li>
+                <NuxtLink
+                    to="/admin"
+                    active-class="bg-primary-600 text-white"
+                    class="block px-4 py-2.5 rounded-lg text-primary-100 text-sm font-medium hover:bg-primary-600 hover:text-white transition-colors"
+                >
+                    داشبورد
+                </NuxtLink>
             </li>
 
-            <Submenu title="کاربران">
-                <li
-                    class="px-4 py-2 rounded-lg text-primary-200 text-sm cursor-pointer hover:bg-primary-600 hover:text-white transition-colors">
-                    <NuxtLink to="/admin/users">لیست کاربران</NuxtLink>
+            <Submenu title="کاربران" base-path="/admin/users">
+                <li>
+                    <NuxtLink
+                        to="/admin/users"
+                        active-class="bg-primary-600 text-white"
+                        exact-active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors"
+                    >
+                        لیست کاربران
+                    </NuxtLink>
                 </li>
-                <li
-                    class="px-4 py-2 rounded-lg text-primary-200 text-sm cursor-pointer hover:bg-primary-600 hover:text-white transition-colors">
-                    <NuxtLink to="/admin/users/create">افزودن کاربر جدید</NuxtLink>
+                <li>
+                    <NuxtLink
+                        to="/admin/users/create"
+                        active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors"
+                    >
+                        افزودن کاربر جدید
+                    </NuxtLink>
                 </li>
             </Submenu>
         </ul>
