@@ -2,14 +2,53 @@
     <div>
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-xl font-bold text-text">کاربران</h1>
-            <NuxtLink to="/admin/users/create"
-                class="flex items-center gap-2 bg-primary-400 hover:bg-primary-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                افزودن کاربر
-            </NuxtLink>
+            <div class="flex items-center gap-2">
+                <FilterDropdown :active-count="activeFilterCount" @apply="applyFilters" @reset="resetFilters">
+
+                    <div>
+                        <label class="block text-sm font-medium text-text mb-1.5 placeholder:text-right">نام و نام خانوادگی</label>
+                        <input v-model="filters.full_name" type="text" dir="auto" placeholder="نام و نام خانوادگی کاربر..." class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-text mb-1.5">وضعیت</label>
+                        <select v-model="filters.is_active" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors">
+                            <option value="">همه</option>
+                            <option value="1">فعال</option>
+                            <option value="0">غیرفعال</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-text mb-1.5">تایید موبایل</label>
+                        <select v-model="filters.is_mobile_verified" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors">
+                            <option value="">همه</option>
+                            <option value="1">تایید شده</option>
+                            <option value="0">تایید نشده</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-text mb-1.5">موبایل</label>
+                        <input v-model="filters.mobile" type="text" dir="ltr" placeholder="09xxxxxxxxx" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors" />
+                    </div>
+
+                </FilterDropdown>
+
+                <NuxtLink to="/admin/users/create"
+                    class="flex items-center gap-2 bg-primary-400 hover:bg-primary-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    افزودن کاربر
+                </NuxtLink>
+            </div>
         </div>
+        <div class="w-full" id="filter"></div>
 
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center py-16 text-muted text-sm">
@@ -140,6 +179,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import FilterDropdown from '~/components/ui/FilterDropdown.vue'
 
 const { get } = useApi()
 const route = useRoute()
@@ -148,16 +188,58 @@ const router = useRouter()
 const users = ref(null)
 const loading = ref(true)
 
+const filters = reactive({
+    is_active: route.query.is_active || '',
+    is_mobile_verified: route.query.is_mobile_verified || '',
+    mobile: route.query.mobile || '',
+    full_name: route.query.full_name || '',
+})
+
+const activeFilterCount = computed(() => {
+    return Object.values(filters).filter((v) => v !== '').length
+})
+
 const fetchUsers = async (page = 1) => {
     loading.value = true
     try {
-        const response = await get(`/api/admin/user?page=${page}`)
+        const query = new URLSearchParams({
+            page,
+            ...(filters.is_active !== '' && { is_active: filters.is_active }),
+            ...(filters.full_name !== '' && { full_name: filters.full_name }),
+            ...(filters.is_mobile_verified !== '' && { is_mobile_verified: filters.is_mobile_verified }),
+            ...(filters.mobile !== '' && { mobile: filters.mobile }),
+        })
+
+        const response = await get(`/api/admin/user?${query.toString()}`)
         if (response.status) {
             users.value = response.users
         }
     } finally {
         loading.value = false
     }
+}
+
+const applyFilters = async () => {
+    router.push({
+        query: {
+            ...(filters.is_active !== '' && { is_active: filters.is_active }),
+            ...(filters.is_mobile_verified !== '' && { is_mobile_verified: filters.is_mobile_verified }),
+            ...(filters.mobile !== '' && { mobile: filters.mobile }),
+            ...(filters.full_name !== '' && { full_name: filters.full_name }),
+            page: 1, // reset to first page on new filter
+        },
+    })
+    await fetchUsers();
+    
+}
+
+const resetFilters = async() => {
+    filters.is_active = ''
+    filters.is_mobile_verified = ''
+    filters.mobile = ''
+    filters.full_name = ''
+    router.push({ query: { page: 1 } })
+    await fetchUsers();
 }
 
 const goToPage = (page) => {
