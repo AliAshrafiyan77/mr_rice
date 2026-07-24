@@ -6,10 +6,21 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </NuxtLink>
-      <h1 class="text-xl font-bold text-text">افزودن نقش جدید</h1>
+      <h1 class="text-xl font-bold text-text">ویرایش نقش</h1>
     </div>
 
-    <form @submit.prevent="submit" class="bg-surface rounded-xl border border-border p-4 md:p-6">
+    <!-- Loading state for initial role fetch -->
+    <div v-if="pageLoading" class="bg-surface rounded-xl border border-border p-4 md:p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
+        <div class="h-10 rounded-lg bg-background animate-pulse" />
+        <div class="h-10 rounded-lg bg-background animate-pulse" />
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-8">
+        <div v-for="i in 6" :key="i" class="h-28 rounded-xl bg-background animate-pulse" />
+      </div>
+    </div>
+
+    <form v-else @submit.prevent="submit" class="bg-surface rounded-xl border border-border p-4 md:p-6">
       <!-- Basic fields -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
         <FormField label="نام نقش (فارسی)" :error="errors.fa_name">
@@ -58,13 +69,7 @@
           {{ errors.permissions[0] }}
         </p>
 
-        <!-- Loading skeleton -->
-        <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div v-for="i in 6" :key="i" class="h-28 rounded-xl bg-background animate-pulse" />
-        </div>
-
-        <!-- Groups grid -->
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <div
             v-for="(group, groupKey) in groupedPermissions"
             :key="groupKey"
@@ -106,13 +111,13 @@
         {{ generalError }}
       </div>
 
-      <div class="sticky bottom-1 flex items-center gap-3 mt-6 pt-4 border-t border-border">
+      <div class="sticky bottom-1 bg-white/55 flex items-center gap-3 mt-6 pt-4 border-t border-border">
         <button
           type="submit"
           :disabled="submitting"
           class="bg-primary-700 hover:bg-primary-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {{ submitting ? 'در حال ذخیره...' : 'ذخیره نقش' }}
+          {{ submitting ? 'در حال ذخیره...' : 'ذخیره تغییرات' }}
         </button>
         <NuxtLink
           to="/admin/roles"
@@ -129,8 +134,11 @@
 import { computed, reactive, ref } from 'vue'
 import FormField from '~/components/ui/FormField.vue'
 
-const { post, get } = useApi()
+const { put, get } = useApi()
 const router = useRouter()
+const route = useRoute()
+
+const roleId = route.params.id
 
 const form = reactive({
   fa_name: '',
@@ -141,7 +149,7 @@ const form = reactive({
 const errors = ref({})
 const generalError = ref('')
 const submitting = ref(false)
-const loading = ref(true)
+const pageLoading = ref(true)
 const permissions = ref([])
 
 // group by `group` key, label from `fa_group`
@@ -184,7 +192,7 @@ const submit = async () => {
   generalError.value = ''
 
   try {
-    const response = await post('/api/admin/role', form)
+    const response = await put(`/api/admin/role/${roleId}`, form)
     if (response.status) {
       router.push('/admin/roles')
     }
@@ -201,19 +209,28 @@ const submit = async () => {
 }
 
 const fetchPermissions = async () => {
-  loading.value = true
-  try {
-    const response = await get('/api/admin/permission')
-    if (response.status) {
-      permissions.value = response.permissions
-    }
-  } finally {
-    loading.value = false
+  const response = await get('/api/admin/permission')
+  if (response.status) {
+    permissions.value = response.permissions
+  }
+}
+
+const fetchRole = async () => {
+  const response = await get(`/api/admin/role/${roleId}`)
+  if (response.status) {
+    form.fa_name = response.role.fa_name
+    form.name = response.role.name
+    form.permissions = response.role.permissions?.map((p) => p.name) ?? []
   }
 }
 
 onMounted(async () => {
-  await fetchPermissions()
+  pageLoading.value = true
+  try {
+    await Promise.all([fetchPermissions(), fetchRole()])
+  } finally {
+    pageLoading.value = false
+  }
 })
 
 definePageMeta({
