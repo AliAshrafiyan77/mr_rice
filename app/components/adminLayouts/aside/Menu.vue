@@ -18,7 +18,7 @@
             </button>
         </div>
 
-        <ul class="p-3 space-y-1">
+        <ul class="p-3 space-y-1 [&>li]:border-b [&>li]:border-primary-600/50">
             <li>
                 <NuxtLink to="/admin" active-class="bg-primary-600 text-white"
                     class="block px-4 py-2.5 rounded-lg text-primary-100 text-sm font-medium hover:bg-primary-600 hover:text-white transition-colors">
