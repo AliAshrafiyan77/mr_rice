@@ -76,11 +76,11 @@
                             </td>
 
                             <td class="px-4 py-3 text-muted">
-                                {{ product.base_amount_per_unit }}
+                                {{ formatNumber(product.base_amount_per_unit) }}
                             </td>
 
                             <td class="px-4 py-3">
-                                {{ product.updated_at }}
+                                {{ toJalali(product.updated_at)}}
                             </td>
 
                             <td class="px-4 py-3">
@@ -121,13 +121,17 @@
                         </div>
                         <span
                             class="inline-flex bg-success/10 text-success items-center px-2.5 py-1 rounded-full text-xs font-medium shrink-0">
-                            {{ 'قیمت واحد:' + ' ' + product.base_amount_per_unit }}
+                            {{ 'قیمت واحد:' + ' ' + formatNumber(product.base_amount_per_unit) }}
                         </span>
                     </div>
 
                     <div class="flex items-center justify-between pt-3 border-t border-border">
-                        <p class="text-xs text-muted">آخریت تغییرات: <span class="text-text">{{ product.updated_at
-                        }}</span>
+                        <p class="text-xs text-muted">آخریت تغییرات:
+                            <span class="text-text">
+                                {{
+                                    toJalali(product.updated_at)
+                                }}
+                            </span>
                         </p>
                         <div class="flex items-center gap-2">
                             <button
@@ -160,7 +164,10 @@
 import { ref, onMounted } from 'vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import FilterDropdown from '~/components/ui/FilterDropdown.vue'
+import { useTools } from '~/composables/useTools'
 
+
+const { toJalali, formatNumber } = useTools()
 const { get } = useApi()
 const route = useRoute()
 const router = useRouter()
