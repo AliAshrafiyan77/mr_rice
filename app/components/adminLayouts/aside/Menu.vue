@@ -42,6 +42,23 @@
                 </li>
             </Submenu>
 
+            <Submenu title="محصولات" base-path="/admin/products">
+                <li>
+                    <NuxtLink to="/admin/products" active-class="bg-primary-600 text-white"
+                        exact-active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        لیست محصولات 
+                    </NuxtLink>
+                </li>
+                <li>
+                    <NuxtLink to="/admin/products/create" active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        افزودن محصول جدید
+                    </NuxtLink>
+                </li>
+            </Submenu>
+
+
             <Submenu title="سطوح دسترسی" base-path="/admin/roles">
                 <li>
                     <NuxtLink to="/admin/roles" active-class="bg-primary-600 text-white"

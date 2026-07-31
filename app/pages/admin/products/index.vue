@@ -1,17 +1,19 @@
 <template>
     <div>
         <div class="flex items-center justify-between mb-6">
-            <h1 class="text-xl font-bold text-text">کاربران</h1>
+            <h1 class="text-xl font-bold text-text">محصولات مادر</h1>
             <div class="flex items-center gap-2">
                 <FilterDropdown :active-count="activeFilterCount" @apply="applyFilters" @reset="resetFilters">
 
                     <div>
-                        <label class="block text-sm font-medium text-text mb-1.5 placeholder:text-right">نام و نام خانوادگی</label>
-                        <input v-model="filters.full_name" type="text" dir="auto" placeholder="نام و نام خانوادگی کاربر..." class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                        <label class="block text-sm font-medium text-text mb-1.5 placeholder:text-right">
+                            عنوان محصول
+                        </label>
+                        <input v-model="filters.title" type="text" dir="auto" placeholder="عنوان محصول..." class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
     focus:outline-none focus:border-primary-400 transition-colors" />
                     </div>
 
-                    <div>
+                    <!-- <div>
                         <label class="block text-sm font-medium text-text mb-1.5">وضعیت</label>
                         <select v-model="filters.is_active" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
     focus:outline-none focus:border-primary-400 transition-colors">
@@ -19,32 +21,15 @@
                             <option value="1">فعال</option>
                             <option value="0">غیرفعال</option>
                         </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-text mb-1.5">تایید موبایل</label>
-                        <select v-model="filters.is_mobile_verified" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors">
-                            <option value="">همه</option>
-                            <option value="1">تایید شده</option>
-                            <option value="0">تایید نشده</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-text mb-1.5">موبایل</label>
-                        <input v-model="filters.mobile" type="text" dir="ltr" placeholder="09xxxxxxxxx" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors" />
-                    </div>
-
+                    </div> -->
                 </FilterDropdown>
 
-                <NuxtLink to="/admin/users/create"
+                <NuxtLink to="/admin/products/create"
                     class="flex items-center gap-2 bg-primary-400 hover:bg-primary-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    افزودن کاربر
+                    افزودن محصول مادر
                 </NuxtLink>
             </div>
         </div>
@@ -56,9 +41,9 @@
         </div>
 
         <!-- Empty state -->
-        <div v-else-if="!users?.length"
+        <div v-else-if="!products?.length"
             class="flex flex-col items-center justify-center py-16 text-muted text-sm bg-surface rounded-xl border border-border">
-            کاربری یافت نشد
+            محصولی یافت نشد
         </div>
 
         <template v-else>
@@ -67,41 +52,40 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-background border-b border-border text-center">
-                            <th class="font-medium text-muted px-4 py-3">نام</th>
-                            <th class="font-medium text-muted px-4 py-3">موبایل</th>
-                            <th class="font-medium text-muted px-4 py-3">کد ملی</th>
-                            <th class="font-medium text-muted px-4 py-3">وضعیت</th>
-                            <th class="font-medium text-muted px-4 py-3">عملیات</th>
+                            <th class="font-medium text-muted px-4 py-3">عنوان</th>
+                            <th class="font-medium text-muted px-4 py-3">واحد</th>
+                            <th class="font-medium text-muted px-4 py-3">دسته بندی</th>
+                            <th class="font-medium text-muted px-4 py-3">قیمت واحد</th>
+                            <th class="font-medium text-muted px-4 py-3">آخرین تغیرات</th>
+                            <th class="font-medium text-muted px-4 py-3"></th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <tr v-for="user in users" :key="user.id"
+                        <tr v-for="product in products" :key="product.id"
                             class="border-b border-border last:border-0 hover:bg-background/60 transition-colors text-center">
                             <td class="px-4 py-3 font-medium">
-                                {{ user.name }} {{ user.last_name }}
+                                {{ product.title }}
                             </td>
 
                             <td class="px-4 py-3 text-muted" dir="ltr">
-                                {{ user.mobile }}
+                                {{ product.unit }}
+                            </td>
+                            <td class="px-4 py-3 text-muted" dir="ltr">
+                                {{ product.category }}
                             </td>
 
                             <td class="px-4 py-3 text-muted">
-                                {{ user.national_code }}
+                                {{ product.base_amount_per_unit }}
                             </td>
 
                             <td class="px-4 py-3">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                                    :class="user.is_active
-                                        ? 'bg-success/10 text-success'
-                                        : 'bg-danger/10 text-danger'">
-                                    {{ user.is_active ? 'فعال' : 'غیرفعال' }}
-                                </span>
+                                {{ product.updated_at }}
                             </td>
 
                             <td class="px-4 py-3">
                                 <div class="flex justify-center items-center gap-2">
-                                    <NuxtLink :to="'/admin/users/' + user.id"
+                                    <NuxtLink :to="'/admin/products/' + product.id"
                                         class="p-1.5 rounded-lg text-muted hover:bg-background hover:text-primary-500 transition-colors">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -126,28 +110,24 @@
 
             <!-- Mobile cards -->
             <div class="md:hidden space-y-3">
-                <div v-for="user in users" :key="user.id" class="bg-surface rounded-xl border border-border p-4">
+                <div v-for="product in products" :key="product.id"
+                    class="bg-surface rounded-xl border border-border p-4">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 rounded-full bg-primary-400 flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                                {{ user.name?.charAt(0) }}
-                            </div>
                             <div>
-                                <p class="text-text font-medium text-sm">{{ user.name }} {{ user.last_name }}</p>
-                                <p class="text-muted text-xs" dir="ltr">{{ user.mobile }}</p>
+                                <p class="text-text font-medium text-sm">{{ product.title }}</p>
+                                <p class="text-muted text-xs" dir="ltr">{{ 'واحد:' + ' ' + product.unit }}</p>
                             </div>
                         </div>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium shrink-0"
-                            :class="user.is_active
-                                ? 'bg-success/10 text-success'
-                                : 'bg-danger/10 text-danger'">
-                            {{ user.is_active ? 'فعال' : 'غیرفعال' }}
+                        <span
+                            class="inline-flex bg-success/10 text-success items-center px-2.5 py-1 rounded-full text-xs font-medium shrink-0">
+                            {{ 'قیمت واحد:' + ' ' + product.base_amount_per_unit }}
                         </span>
                     </div>
 
                     <div class="flex items-center justify-between pt-3 border-t border-border">
-                        <p class="text-xs text-muted">کد ملی: <span class="text-text">{{ user.national_code }}</span>
+                        <p class="text-xs text-muted">آخریت تغییرات: <span class="text-text">{{ product.updated_at
+                        }}</span>
                         </p>
                         <div class="flex items-center gap-2">
                             <button
@@ -185,35 +165,29 @@ const { get } = useApi()
 const route = useRoute()
 const router = useRouter()
 
-const users = ref(null)
+const products = ref(null)
 const paginator = ref(null)
 const loading = ref(true)
 
 const filters = reactive({
-    is_active: route.query.is_active || '',
-    is_mobile_verified: route.query.is_mobile_verified || '',
-    mobile: route.query.mobile || '',
-    full_name: route.query.full_name || '',
+    title: route.query.title || '',
 })
 
 const activeFilterCount = computed(() => {
     return Object.values(filters).filter((v) => v !== '').length
 })
 
-const fetchUsers = async (page = 1) => {
+const fetchProducts = async (page = 1) => {
     loading.value = true
     try {
         const query = new URLSearchParams({
             page,
-            ...(filters.is_active !== '' && { is_active: filters.is_active }),
-            ...(filters.full_name !== '' && { full_name: filters.full_name }),
-            ...(filters.is_mobile_verified !== '' && { is_mobile_verified: filters.is_mobile_verified }),
-            ...(filters.mobile !== '' && { mobile: filters.mobile }),
+            ...(filters.title !== '' && { title: filters.title }),
         })
 
-        const response = await get(`/api/admin/user?${query.toString()}`)
+        const response = await get(`/api/admin/product?${query.toString()}`)
         if (response.status) {
-            users.value = response.users
+            products.value = response.products
             paginator.value = response.paginator
         }
     } finally {
@@ -224,24 +198,17 @@ const fetchUsers = async (page = 1) => {
 const applyFilters = async () => {
     router.push({
         query: {
-            ...(filters.is_active !== '' && { is_active: filters.is_active }),
-            ...(filters.is_mobile_verified !== '' && { is_mobile_verified: filters.is_mobile_verified }),
-            ...(filters.mobile !== '' && { mobile: filters.mobile }),
-            ...(filters.full_name !== '' && { full_name: filters.full_name }),
+            ...(filters.title !== '' && { title: filters.title }),
             page: 1, // reset to first page on new filter
         },
     })
-    await fetchUsers();
-    
+    await fetchProducts();
+
 }
 
-const resetFilters = async() => {
-    filters.is_active = ''
-    filters.is_mobile_verified = ''
-    filters.mobile = ''
-    filters.full_name = ''
-    router.push({ query: { page: 1 } })
-    await fetchUsers();
+const resetFilters = async () => {
+    filters.title = ''
+    await fetchProducts();
 }
 
 const goToPage = (page) => {
@@ -250,13 +217,13 @@ const goToPage = (page) => {
 
 onMounted(() => {
     const initialPage = Number(route.query.page) || 1
-    fetchUsers(initialPage)
+    fetchProducts(initialPage)
 })
 
 watch(
     () => route.query.page,
     (newPage) => {
-        fetchUsers(Number(newPage) || 1)
+        fetchProducts(Number(newPage) || 1)
     }
 )
 
