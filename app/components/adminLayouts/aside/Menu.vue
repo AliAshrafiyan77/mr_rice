@@ -57,6 +57,20 @@
                     </NuxtLink>
                 </li>
             </Submenu>
+            <Submenu title="دسته بندی ها" base-path="/admin/categories">
+                <li>
+                    <NuxtLink to="/admin/categories" active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        لیست دسته بندی ها
+                    </NuxtLink>
+                </li>
+                <li>
+                    <NuxtLink to="/admin/categories/create" active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        افزودن دسته بندی جدید
+                    </NuxtLink>
+                </li>
+            </Submenu>
 
 
             <Submenu title="سطوح دسترسی" base-path="/admin/roles">
