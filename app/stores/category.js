@@ -10,7 +10,7 @@ export const useCategoryStore = defineStore("category", {
     async fetchCategories() {
       try {
         const { get } = useApi();
-        const response = await get('/api/categories', {
+        const response = await get('/api/admin/category', {
           method: 'GET',
         });
         
