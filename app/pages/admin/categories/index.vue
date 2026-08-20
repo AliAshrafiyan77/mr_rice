@@ -5,6 +5,15 @@
 <script setup>
 
 import { useCategoryStore } from '#imports';
-const category = useCategoryStore()
+const categoryStore = useCategoryStore();
+
+definePageMeta({
+    layout: 'admin',
+    middleware: ['auth', 'admin'],
+});
+
+onMounted(() => {
+    categoryStore.fetchCategories;
+})
 
 </script>

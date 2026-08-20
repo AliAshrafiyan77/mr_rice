@@ -10,21 +10,48 @@
         </div>
 
         <form @submit.prevent="submit" class="bg-surface rounded-xl border border-border p-4 md:p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                <FormField label="عنوان" :error="errors.title">
-                    <input v-model="form.title" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5">
+                <div class="space-y-5">
+                    <FormField label="عنوان" :error="errors.title">
+                        <input v-model="form.title" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
                         focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.title ? ' border-danger focus:border-danger' : ''" />
-                </FormField>
+                            :class="errors.title ? ' border-danger focus:border-danger' : ''" />
+                    </FormField>
 
-                <FormField label="دسته بندی والد" :error="errors.parent">
-                    <select v-model="form.parent" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                    <FormField label="عنوان انگلیسی" :error="errors.en_title">
+                        <input v-model="form.en_title" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                        focus:outline-none focus:border-primary-400 transition-colors"
+                            :class="errors.en_title ? ' border-danger focus:border-danger' : ''" />
+                    </FormField>
+
+                    <FormField label="دسته بندی والد" :error="errors.parent_id">
+                        <select v-model="form.parent_id" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
     focus:outline-none focus:border-primary-400 transition-colors">
-                        <option value="0">همه</option>
-                        <option v-for="(category, index) in categoryStore.categories" :value="category.id" :key="index">
-                            {{ category.title }}</option>
-                    </select>
+                            <option value="">بدون والد</option>
+                            <option v-for="(category, index) in categoryStore.categoriesSimple" :value="category.id"
+                                :key="index" :class="errors.description ? ' border-danger focus:border-danger' : ''">
+                                {{ category.title }}</option>
+                        </select>
+                    </FormField>
+
+                    <FormField label="توضیحات" :error="errors.description">
+                        <textarea v-model="form.description" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                        focus:outline-none focus:border-primary-400 transition-colors"
+                            :class="errors.description ? ' border-danger focus:border-danger' : ''"></textarea>
+                    </FormField>
+                </div>
+
+                <FormField label="تصویر دسته بندی" :error="errors.filename">
+                    <FileUploader
+                        purpose="image"
+                        v-model="categoryImage"
+                        @error="onUploadError"
+                    />
                 </FormField>
+            </div>
+
+            <div v-if="uploadError" class="mt-4 bg-danger/10 text-danger text-sm rounded-lg px-4 py-3">
+                {{ uploadError }}
             </div>
 
             <div v-if="generalError" class="mt-4 bg-danger/10 text-danger text-sm rounded-lg px-4 py-3">
@@ -36,7 +63,7 @@
                     class="bg-primary-400 hover:bg-primary-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     {{ submitting ? 'در حال ذخیره...' : 'ذخیره دسته بندی' }}
                 </button>
-                <NuxtLink to="/admin/users"
+                <NuxtLink to="/admin/categories"
                     class="text-muted text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-background transition-colors">
                     انصراف
                 </NuxtLink>
@@ -48,8 +75,8 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import FormField from '~/components/ui/FormField.vue'
+import FileUploader from '~/components/admin/Partials/FileUploader.vue'
 import { useCategoryStore } from '#imports';
-
 
 const { post } = useApi()
 const router = useRouter()
@@ -57,20 +84,35 @@ const categoryStore = useCategoryStore()
 
 const form = reactive({
     title: '',
-    parent: '',
+    parent_id: '',
+    description: '',
+    en_title:'',
 })
+
+const categoryImage = ref(null)
+const uploadError = ref('')
 
 const errors = ref({})
 const generalError = ref('')
 const submitting = ref(false)
 
+const onUploadError = (message) => {
+    uploadError.value = message
+}
+
 const submit = async () => {
     submitting.value = true
     errors.value = {}
     generalError.value = ''
+    uploadError.value = ''
+
+    const payload = {
+        ...form,
+        filename: categoryImage.value?.stored_name || null,
+    }
 
     try {
-        const response = await post('/api/admin/category', form)
+        const response = await post('/api/admin/category', payload)
 
         if (response.status) {
             router.push('/admin/categories')
@@ -93,7 +135,7 @@ definePageMeta({
     middleware: ['auth', 'admin'],
 });
 
-onMounted(() => {
-    categoryStore.fetchCategories;
+onMounted(async () => {
+    await categoryStore.fetchCategorySimpleList();
 })
 </script>
