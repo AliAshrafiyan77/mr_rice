@@ -62,6 +62,7 @@ export function useUppyUploader(options) {
     onError,
     onRemoved,
     onModelUpdate,
+    onFileAdded,
   } = options
 
   const config = useRuntimeConfig()
@@ -248,6 +249,7 @@ export function useUppyUploader(options) {
     instance.on('file-added', (file) => {
       instance.setFileMeta(file.id, { purpose: preset.id })
       syncFilesFromUppy()
+      onFileAdded?.(file)
     })
 
     instance.on('upload', () => {

@@ -6,7 +6,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </NuxtLink>
-            <h1 class="text-xl font-bold text-text">افزودن دسته بندی جدید</h1>
+            <h1 class="text-xl font-bold text-text">ویرایش دسته بندی</h1>
         </div>
 
         <form @submit.prevent="submit" class="bg-surface rounded-xl border border-border p-4 md:p-6">
@@ -45,7 +45,10 @@
                     <FileUploader
                         purpose="image"
                         v-model="categoryImage"
+                        :existing-image-url="existingImageUrl"
+                        :existing-image-path="existingImagePath"
                         @error="onUploadError"
+                        @removed="onImageRemoved"
                     />
                 </FormField>
             </div>
@@ -78,10 +81,10 @@ import FormField from '~/components/ui/FormField.vue'
 import FileUploader from '~/components/admin/Partials/FileUploader.vue'
 import { useCategoryStore } from '#imports';
 
-const { post } = useApi()
+const { put } = useApi()
 const router = useRouter()
 const route = useRoute()
-const categoryStore = useCategoryStore()
+const categoryStore = useCategoryStore();
 
 const form = reactive({
     title: '',
@@ -91,7 +94,12 @@ const form = reactive({
 })
 
 const categoryImage = ref(null)
+const existingImageUrl = ref('')
+const existingImagePath = ref('')
+const existingStoredName = ref('')
+const imageRemoved = ref(false)
 const uploadError = ref('')
+const categoryId = ref(0);
 
 const errors = ref({})
 const generalError = ref('')
@@ -99,6 +107,27 @@ const submitting = ref(false)
 
 const onUploadError = (message) => {
     uploadError.value = message
+}
+
+const onImageRemoved = (payload) => {
+    if (payload?.source === 'existing') {
+        imageRemoved.value = true
+        existingImageUrl.value = ''
+        existingImagePath.value = ''
+        existingStoredName.value = ''
+    }
+}
+
+const resolveFilename = () => {
+    if (categoryImage.value?.stored_name) {
+        return categoryImage.value.stored_name
+    }
+
+    if (imageRemoved.value) {
+        return null
+    }
+
+    return existingStoredName.value || null
 }
 
 const submit = async () => {
@@ -109,11 +138,11 @@ const submit = async () => {
 
     const payload = {
         ...form,
-        filename: categoryImage.value?.stored_name || null,
+        filename: resolveFilename(),
     }
 
     try {
-        const response = await post('/api/admin/category', payload)
+        const response = await put(`/api/admin/category/${categoryId.value}`, payload)
 
         if (response.status) {
             router.push('/admin/categories')
@@ -137,13 +166,17 @@ definePageMeta({
 });
 
 onMounted(async () => {
-    const categoryId = route.params.id;
-    await categoryStore.fetchCategory(categoryId);
+    categoryId.value = route.params.id;
+    await categoryStore.fetchCategory(categoryId.value);
     form.title = categoryStore.category.title
     form.en_title = categoryStore.category.en_title
     form.parent_id = categoryStore.category.parent_id
     form.description = categoryStore.category.description
-    categoryImage.value = categoryStore.category.filename
+    existingImageUrl.value = categoryStore.category.filename || ''
+    existingStoredName.value = categoryStore.category.stored_name || ''
+    existingImagePath.value = existingStoredName.value
+        ? `uploads/image/${existingStoredName.value}`
+        : ''
     
     await categoryStore.fetchCategorySimpleList();
 })
