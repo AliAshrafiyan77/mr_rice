@@ -5,12 +5,12 @@
         {{ category.title }}
       </p>
 
-      <button
+      <NuxtLink :to="`/admin/categories/${category.id}`"
         type="button"
         class="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium text-muted border border-border hover:bg-background hover:text-primary-500 transition-colors"
       >
         ویرایش
-      </button>
+      </NuxtLink>
     </div>
 
     <ul v-if="category.children?.length" class="cat-tree">

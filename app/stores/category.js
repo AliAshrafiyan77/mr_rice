@@ -4,7 +4,8 @@ import { useApi } from "#imports";
 export const useCategoryStore = defineStore("category", {
   state: () => ({
     categories: [],
-    categoriesSimple: []
+    categoriesSimple: [],
+    category:null,
   }),
 
   actions: {
@@ -40,6 +41,24 @@ export const useCategoryStore = defineStore("category", {
       } catch (error) {
         this.categoriesSimple = [];
         console.error('Error fetching category simple list:', error);
+      }
+    },
+    
+    async fetchCategory(categoryId){
+      try {
+        const { get } = useApi();
+        const response = await get(`/api/admin/category/${categoryId}`, {
+          method: 'GET',
+        });
+        
+        if (response.status) {
+          this.category = response.category;
+        } else {
+          this.category = null;
+        }
+      } catch (error) {
+        this.category = null;
+        console.error('Error fetching categories:', error);
       }
     }
   }
