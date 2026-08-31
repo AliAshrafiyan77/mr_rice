@@ -1,20 +1,21 @@
 <template>
     <Multiselect
         dir="rtl"
-        v-model="value"
+        v-model="internalValue"
         :options="searchOptions"
         :mode="mode"
         :searchable="searchable"
         :create-option="createOption"
         :filter-results="false"
         :resolve-on-load="false"
+        :object="usesObjectMode"
         :min-chars="minChars"
         :delay="delay"
         :close-on-select="closeOnSelect"
         :disabled="disabled"
         :placeholder="placeholder"
-        :label="'label'"
-        :value-prop="'value'"
+        label="label"
+        value-prop="value"
         :clear-on-search="clearOnSearch"
     />
 </template>
@@ -98,6 +99,16 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+
+    responseKey: {
+        type: String,
+        default: 'keywords',
+    },
+
+    emitField: {
+        type: String,
+        default: 'label',
+    },
 })
 
 const emit = defineEmits([
@@ -106,40 +117,125 @@ const emit = defineEmits([
 
 const { get } = useApi()
 
-const value = computed({
-    get: () => props.modelValue,
+const usesObjectMode = computed(() => props.mode === 'tags')
+
+function toOptionItem(item) {
+    if (typeof item === 'object' && item !== null) {
+        const optionValue = item.value ?? item[props.value] ?? item[props.label] ?? item.label
+        const optionLabel = item.label ?? item[props.label] ?? String(optionValue ?? '')
+
+        return {
+            value: optionValue,
+            label: optionLabel,
+        }
+    }
+
+    return {
+        value: item,
+        label: String(item),
+    }
+}
+
+function toInternalValue(value) {
+    if (props.mode !== 'tags') {
+        return value
+    }
+
+    if (!value) {
+        return []
+    }
+
+    if (Array.isArray(value)) {
+        return value.map(toOptionItem)
+    }
+
+    if (typeof value === 'object') {
+        return Object.entries(value).map(([key, title]) => ({
+            value: props.value === 'id' ? (Number(key) || key) : title,
+            label: String(title),
+        }))
+    }
+
+    return [toOptionItem(value)]
+}
+
+function toExternalValue(value) {
+    if (!usesObjectMode.value) {
+        return value
+    }
+
+    if (!Array.isArray(value)) {
+        return []
+    }
+
+    return value.map((item) => {
+        if (typeof item === 'object' && item !== null) {
+            if (props.emitField === 'value') {
+                return item.value
+            }
+
+            return item.label ?? item.value
+        }
+
+        return item
+    }).filter((item) => item !== null && item !== undefined && item !== '')
+}
+
+function shouldNormalizeExternalValue(value) {
+    if (props.mode !== 'tags' || !value) {
+        return false
+    }
+
+    if (!Array.isArray(value) && typeof value === 'object') {
+        return true
+    }
+
+    if (Array.isArray(value) && value.some((item) => typeof item === 'object' && item !== null)) {
+        return true
+    }
+
+    return false
+}
+
+watch(
+    () => props.modelValue,
+    (value) => {
+        if (!shouldNormalizeExternalValue(value)) {
+            return
+        }
+
+        emit('update:modelValue', toExternalValue(toInternalValue(value)))
+    },
+    { immediate: true, deep: true },
+)
+
+const internalValue = computed({
+    get: () => toInternalValue(props.modelValue),
 
     set: (newValue) => {
-        emit('update:modelValue', newValue)
+        emit('update:modelValue', toExternalValue(newValue))
     },
 })
 
 const searchOptions = async (query) => {
-
     if (!query || query.length < props.minChars) {
         return []
     }
 
     try {
-
         const url =
             `${props.url}?${props.searchParam}=${encodeURIComponent(query)}&limit=${props.limit}`
 
         const response = await get(url)
-
-        console.log('API response:', response)
-
-        const data = response?.keywords ?? []
+        const data = response?.[props.responseKey] ?? []
 
         return data.map((item) => ({
             value: item[props.value],
             label: item[props.label],
             original: item,
         }))
-
     } catch (error) {
-
-        console.error('RemoteMultiselect error:', error)
+        console.error('Select2 search error:', error)
 
         return []
     }

@@ -1,145 +1,67 @@
 <template>
     <div>
         <div class="flex items-center gap-3 mb-6">
-            <NuxtLink
-                to="/admin/users"
-                class="p-2 rounded-lg text-muted hover:bg-surface transition-colors"
-            >
+            <NuxtLink to="/admin/users" class="p-2 rounded-lg text-muted hover:bg-surface transition-colors">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </NuxtLink>
-            <h1 class="text-xl font-bold text-text">ویرایش محصول مادر</h1>
+            <h1 class="text-xl font-bold text-text">ویرایش محصول</h1>
         </div>
 
-        <!-- Loading -->
-        <div v-if="loading" class="flex items-center justify-center py-16 text-muted text-sm">
-            در حال بارگذاری...
-        </div>
-
-        <form v-else @submit.prevent="submit" class="bg-surface rounded-xl border border-border p-4 md:p-6">
+        <form @submit.prevent="submit" class="bg-surface rounded-xl border border-border p-4 md:p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                <FormField label="نام" :error="errors.name">
-                    <input
-                        v-model="form.name"
-                        type="text"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.name ? 'border-danger focus:border-danger' : ''"
-                    />
+                <FormField label="عنوان" :error="errors.title">
+                    <input v-model="form.title" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                        focus:outline-none focus:border-primary-400 transition-colors"
+                        :class="errors.title ? ' border-danger focus:border-danger' : ''" />
                 </FormField>
 
-                <FormField label="نام خانوادگی" :error="errors.last_name">
-                    <input
-                        v-model="form.last_name"
-                        type="text"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.last_name ? 'border-danger focus:border-danger' : ''"
-                    />
+                <FormField label="واحد" :error="errors.unit">
+                    <select v-model="form.unit" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                        focus:outline-none focus:border-primary-400 transition-colors"
+                        :class="errors.unit ? ' border-danger focus:border-danger' : ''">
+                        <option v-for="unit in ProductUnitOptions" :key="unit.value" :value="unit.value">
+                            {{ unit.label }}
+                        </option>
+                    </select>
+
                 </FormField>
 
-                <FormField label="موبایل" :error="errors.mobile">
-                    <input
-                        v-model="form.mobile"
-                        type="text"
-                        dir="ltr"
-                        placeholder="09xxxxxxxxx"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.mobile ? 'border-danger focus:border-danger' : ''"
-                    />
+                <FormField label="قیمت واحد(تومان)" :error="errors.base_amount_per_unit">
+                    <input :value="tools.formatNumber(form.base_amount_per_unit)" type="text" dir="ltr" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+      focus:outline-none focus:border-primary-400 transition-colors"
+                        :class="errors.base_amount_per_unit ? 'border-danger focus:border-danger' : ''"
+                        @input="form.base_amount_per_unit = tools.unformatNumber($event.target.value)" />
                 </FormField>
 
-                <FormField label="کد ملی" :error="errors.national_code">
-                    <input
-                        v-model="form.national_code"
-                        type="text"
-                        dir="ltr"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.national_code ? 'border-danger focus:border-danger' : ''"
-                    />
+                <FormField label="دسته بندی" :error="errors.category_id">
+                    <select v-model="form.category_id" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors">
+                        <option disabled value="">انتخاب دسته</option>
+                        <option v-for="(category, index) in categoryStore.categoriesSimple" :value="category.id"
+                            :key="index" :class="errors.category ? ' border-danger focus:border-danger' : ''">
+                            {{ category.title }}</option>
+                    </select>
+
+                </FormField>
+                <FormField label="کلید واژه ها">
+                    <Select2 v-if="formReady" class="w-full rounded-lg border border-border bg-background"
+                        v-model="form.keywords" url="api/admin/keyword" label="title" value="id" mode="tags"
+                        placeholder="کلید واژه ها را جستجو یا ایجاد کنید" :create-option="true"
+                        :close-on-select="false" />
                 </FormField>
 
-                <FormField label="رمز عبور جدید" :error="errors.password">
-                    <input
-                        v-model="form.password"
-                        type="password"
-                        dir="ltr"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.password ? 'border-danger focus:border-danger' : ''"
-                    />
-                    <p class="text-xs text-muted mt-1">
-                        در صورت خالی گذاشتن، رمز عبور فعلی تغییر نمی‌کند
-                    </p>
+                <FormField label="توضیحات سئو" :error="errors.meta_description" class="md:col-span-2">
+                    <textarea dir="auto" rows="3" v-model="form.meta_description" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors"></textarea>
+
                 </FormField>
 
-                <FormField label="تکرار رمز عبور جدید" :error="errors.password_confirmation">
-                    <input
-                        v-model="form.password_confirmation"
-                        type="password"
-                        dir="ltr"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.password_confirmation ? 'border-danger focus:border-danger' : ''"
-                    />
+                <FormField label="توضیحات کامل" :error="errors.description" class="md:col-span-2">
+                    <RichTextEditor v-if="formReady" v-model="form.description" />
                 </FormField>
 
-                <FormField label="تاریخ تولد" :error="errors.birth_date">
-                    <JalaliDatePicker v-model="form.birth_date" placeholder="1377/08/11" />
-                </FormField>
-
-                <FormField label="کد معرف" :error="errors.referral_code">
-                    <input
-                        v-model="form.referral_code"
-                        type="text"
-                        dir="ltr"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.referral_code ? 'border-danger focus:border-danger' : ''"
-                    />
-                </FormField>
-
-                <FormField label="توضیحات" :error="errors.description" class="md:col-span-2">
-                    <textarea
-                        v-model="form.description"
-                        rows="3"
-                        class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-    focus:outline-none focus:border-primary-400 transition-colors resize-none"
-                        :class="errors.description ? 'border-danger focus:border-danger' : ''"
-                    ></textarea>
-                </FormField>
-
-                <div class="md:col-span-2 flex flex-wrap items-center gap-6 pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            v-model="form.is_active"
-                            type="checkbox"
-                            class="w-4 h-4 rounded border-border text-primary-400 focus:ring-primary-400"
-                        />
-                        <span class="text-sm text-text">کاربر فعال باشد</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            v-model="form.is_mobile_verified"
-                            type="checkbox"
-                            class="w-4 h-4 rounded border-border text-primary-400 focus:ring-primary-400"
-                        />
-                        <span class="text-sm text-text">موبایل تایید شده باشد</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            v-model="form.is_admin"
-                            type="checkbox"
-                            class="w-4 h-4 rounded border-border text-primary-400 focus:ring-primary-400"
-                        />
-                        <span class="text-sm text-text">دسترسی ادمین</span>
-                    </label>
-                </div>
             </div>
 
             <div v-if="generalError" class="mt-4 bg-danger/10 text-danger text-sm rounded-lg px-4 py-3">
@@ -147,17 +69,12 @@
             </div>
 
             <div class="flex items-center gap-3 mt-6 pt-4 border-t border-border">
-                <button
-                    type="submit"
-                    :disabled="submitting"
-                    class="bg-primary-400 hover:bg-primary-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {{ submitting ? 'در حال ذخیره...' : 'ذخیره تغییرات' }}
+                <button type="submit" :disabled="submitting"
+                    class="bg-primary-400 hover:bg-primary-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    {{ submitting ? 'در حال ذخیره...' : 'ذخیره محصول' }}
                 </button>
-                <NuxtLink
-                    to="/admin/users"
-                    class="text-muted text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-background transition-colors"
-                >
+                <NuxtLink to="/admin/users"
+                    class="text-muted text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-background transition-colors">
                     انصراف
                 </NuxtLink>
             </div>
@@ -166,61 +83,39 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
-import FormField from '~/components/ui/FormField.vue'
-import JalaliDatePicker from '~/components/ui/JalaliDatePicker.vue'
+import { reactive, ref } from 'vue';
+import FormField from '~/components/ui/FormField.vue';
+import RichTextEditor from '~/components/admin/Partials/RichTextEditor.vue';
+import { useCategoryStore } from '#imports';
+import { useTools } from '#imports';
+import {
+    ProductUnit,
+    ProductUnitOptions,
+} from '~/enums/productUnit';
+import Select2 from '~/components/admin/Partials/Select2.vue';
 
-const { get, put } = useApi()
-const route = useRoute()
+const { put, get } = useApi()
 const router = useRouter()
-
-const userId = route.params.id
+const route = useRoute();
+const categoryStore = useCategoryStore();
+const tools = useTools()
 
 const form = reactive({
-    name: '',
-    last_name: '',
-    mobile: '',
-    national_code: '',
-    password: '',
-    password_confirmation: '',
-    birth_date: '',
-    referral_code: '',
+    title: '',
+    unit: ProductUnit.GRAM,
+    base_amount_per_unit: '',
+    category_id: '',
+    keywords: [],
+    meta_description: '',
     description: '',
-    is_active: true,
-    is_mobile_verified: false,
-    is_admin: false,
+
 })
 
 const errors = ref({})
 const generalError = ref('')
-const loading = ref(true)
 const submitting = ref(false)
-
-const fetchUser = async () => {
-    loading.value = true
-    try {
-        const response = await get(`/api/admin/user/${userId}`)
-
-        if (response.status) {
-            const user = response.user
-
-            form.name = user.name ?? ''
-            form.last_name = user.last_name ?? ''
-            form.mobile = user.mobile ?? ''
-            form.national_code = user.national_code ?? ''
-            form.birth_date = user.birth_date ?? ''
-            form.referral_code = user.referral_code ?? ''
-            form.description = user.description ?? ''
-            form.is_active = Boolean(user.is_active)
-            form.is_mobile_verified = Boolean(user.is_mobile_verified)
-            form.is_admin = Boolean(user.is_admin)
-        }
-    } catch (error) {
-        generalError.value = 'کاربر یافت نشد'
-    } finally {
-        loading.value = false
-    }
-}
+const formReady = ref(false)
+const productId = route.params.id
 
 const submit = async () => {
     submitting.value = true
@@ -228,17 +123,10 @@ const submit = async () => {
     generalError.value = ''
 
     try {
-        // don't send empty password fields — backend should treat empty as "no change"
-        const payload = { ...form }
-        if (!payload.password) {
-            delete payload.password
-            delete payload.password_confirmation
-        }
-
-        const response = await put(`/api/admin/user/${userId}`, payload)
+        const response = await put(`/api/admin/product/${productId}`, form)
 
         if (response.status) {
-            router.push('/admin/users')
+            router.push('/admin/products')
         }
     } catch (error) {
         const validationErrors = error?.data?.error?.errors
@@ -253,10 +141,35 @@ const submit = async () => {
     }
 }
 
-onMounted(() => fetchUser())
+
+const fetchProduct = async () => {
+    formReady.value = false
+
+    try {
+        const response = await get(`/api/admin/product/${productId}`)
+
+        if (response.status) {
+            const product = response.product
+            form.title = product.title ?? ''
+            form.unit = product.unit ?? ProductUnit.GRAM
+            form.base_amount_per_unit = product.base_amount_per_unit ?? ''
+            form.category_id = product.category_id ?? ''
+            form.keywords = product.keywords ?? []
+            form.meta_description = product.meta_description ?? ''
+            form.description = product.description ?? ''
+            formReady.value = true
+        }
+    } catch (error) {
+        generalError.value = 'محصول یافت نشد'
+    }
+}
 
 definePageMeta({
     layout: 'admin',
     middleware: ['auth', 'admin'],
+})
+onMounted(async () => {
+    await categoryStore.fetchCategorySimpleList()
+    await fetchProduct()
 })
 </script>

@@ -1,13 +1,11 @@
 <template>
-    <div class="w-full overflow-hidden rounded-xl border border-border bg-background">
-        <!-- Toolbar -->
+    <div class="rich-text-editor w-full overflow-hidden rounded-xl border border-border bg-surface">
         <div
             v-if="editor"
-            class="flex flex-wrap items-center gap-1 border-b border-border bg-muted/30 p-2"
+            class="flex flex-wrap items-center gap-1 border-b border-border bg-background px-2 py-2"
             dir="rtl"
         >
-            <!-- Undo / Redo -->
-            <div class="flex items-center gap-1 pl-2 ml-1 border-l border-border">
+            <div class="toolbar-group">
                 <button
                     type="button"
                     title="بازگشت"
@@ -15,7 +13,7 @@
                     :disabled="!editor.can().chain().focus().undo().run()"
                     @click="editor.chain().focus().undo().run()"
                 >
-                    ↶
+                    <UndoIcon class="h-4 w-4" />
                 </button>
 
                 <button
@@ -25,12 +23,13 @@
                     :disabled="!editor.can().chain().focus().redo().run()"
                     @click="editor.chain().focus().redo().run()"
                 >
-                    ↷
+                    <RedoIcon class="h-4 w-4" />
                 </button>
             </div>
 
-            <!-- Heading -->
-            <div class="relative ml-1">
+            <div class="toolbar-divider" />
+
+            <div class="toolbar-group">
                 <select
                     class="toolbar-select"
                     :value="currentHeading"
@@ -43,42 +42,43 @@
                 </select>
             </div>
 
-            <!-- Text Formatting -->
-            <div class="flex items-center gap-1 px-2 border-x border-border">
+            <div class="toolbar-divider" />
+
+            <div class="toolbar-group">
                 <button
                     type="button"
                     title="پررنگ"
-                    class="toolbar-btn font-bold"
+                    class="toolbar-btn"
                     :class="{ 'toolbar-btn-active': editor.isActive('bold') }"
                     @click="editor.chain().focus().toggleBold().run()"
                 >
-                    B
+                    <BoldIcon class="h-4 w-4" />
                 </button>
 
                 <button
                     type="button"
                     title="کج"
-                    class="toolbar-btn italic"
+                    class="toolbar-btn"
                     :class="{ 'toolbar-btn-active': editor.isActive('italic') }"
                     @click="editor.chain().focus().toggleItalic().run()"
                 >
-                    I
+                    <ItalicIcon class="h-4 w-4" />
                 </button>
 
                 <button
                     type="button"
                     title="خط خورده"
-                    class="toolbar-btn line-through"
+                    class="toolbar-btn"
                     :class="{ 'toolbar-btn-active': editor.isActive('strike') }"
                     @click="editor.chain().focus().toggleStrike().run()"
                 >
-                    S
+                    <StrikethroughIcon class="h-4 w-4" />
                 </button>
-
             </div>
 
-            <!-- Lists -->
-            <div class="flex items-center gap-1 px-2 border-l border-border">
+            <div class="toolbar-divider" />
+
+            <div class="toolbar-group">
                 <button
                     type="button"
                     title="لیست"
@@ -86,7 +86,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('bulletList') }"
                     @click="editor.chain().focus().toggleBulletList().run()"
                 >
-                    ☷
+                    <ListBulletIcon class="h-4 w-4" />
                 </button>
 
                 <button
@@ -96,7 +96,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('orderedList') }"
                     @click="editor.chain().focus().toggleOrderedList().run()"
                 >
-                    ≡
+                    <ListNumberedIcon class="h-4 w-4" />
                 </button>
 
                 <button
@@ -106,34 +106,45 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('blockquote') }"
                     @click="editor.chain().focus().toggleBlockquote().run()"
                 >
-                    ❝
+                    <BlockquoteIcon class="h-4 w-4" />
                 </button>
             </div>
 
-            <!-- Clear formatting -->
-            <button
-                type="button"
-                title="حذف قالب‌بندی"
-                class="toolbar-btn"
-                @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
-            >
-                Tx
-            </button>
+            <div class="toolbar-divider" />
+
+            <div class="toolbar-group">
+                <button
+                    type="button"
+                    title="حذف قالب‌بندی"
+                    class="toolbar-btn"
+                    @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
+                >
+                    <ClearFormattingIcon class="h-4 w-4" />
+                </button>
+            </div>
         </div>
 
-        <!-- Editor -->
         <EditorContent
             :editor="editor"
-            class="rich-editor"
+            class="rich-editor bg-background"
             dir="rtl"
         />
     </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
+import UndoIcon from '~/components/icons/UndoIcon.vue'
+import RedoIcon from '~/components/icons/RedoIcon.vue'
+import BoldIcon from '~/components/icons/BoldIcon.vue'
+import ItalicIcon from '~/components/icons/ItalicIcon.vue'
+import StrikethroughIcon from '~/components/icons/StrikethroughIcon.vue'
+import ListBulletIcon from '~/components/icons/ListBulletIcon.vue'
+import ListNumberedIcon from '~/components/icons/ListNumberedIcon.vue'
+import BlockquoteIcon from '~/components/icons/BlockquoteIcon.vue'
+import ClearFormattingIcon from '~/components/icons/ClearFormattingIcon.vue'
 
 const props = defineProps({
     modelValue: {
@@ -161,10 +172,25 @@ const editor = useEditor({
         },
     },
 
-    onUpdate: ({ editor }) => {
-        emit('update:modelValue', editor.getHTML())
+    onUpdate: ({ editor: currentEditor }) => {
+        emit('update:modelValue', currentEditor.getHTML())
     },
 })
+
+watch(
+    () => props.modelValue,
+    (value) => {
+        if (!editor.value) {
+            return
+        }
+
+        const currentContent = editor.value.getHTML()
+
+        if (value !== currentContent) {
+            editor.value.commands.setContent(value || '', false)
+        }
+    },
+)
 
 const currentHeading = computed(() => {
     if (!editor.value) {
@@ -207,28 +233,39 @@ const setHeading = (value) => {
 </script>
 
 <style scoped>
-.toolbar-btn {
+.toolbar-group {
     display: flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 1.5rem;
+    margin-inline: 0.25rem;
+    background-color: var(--color-border);
+}
+
+.toolbar-btn {
+    display: inline-flex;
     height: 2rem;
-    min-width: 2rem;
+    width: 2rem;
     align-items: center;
     justify-content: center;
-    border-radius: 0.375rem;
-    padding: 0 0.5rem;
-    font-size: 0.875rem;
-    color: var(--color-text);
+    border-radius: 0.5rem;
+    color: var(--color-muted);
     transition: background-color 150ms ease, color 150ms ease;
     cursor: pointer;
 }
 
-.toolbar-btn:hover {
-    background-color: var(--color-background);
-    color: var(--color-primary-500);
+.toolbar-btn:hover:not(:disabled) {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-600);
 }
 
 .toolbar-btn:disabled {
     pointer-events: none;
-    opacity: 0.3;
+    opacity: 0.35;
 }
 
 .toolbar-btn-active {
@@ -238,21 +275,26 @@ const setHeading = (value) => {
 
 .toolbar-select {
     height: 2rem;
+    min-width: 6.5rem;
     cursor: pointer;
-    border: 0;
-    border-radius: 0.375rem;
-    background: transparent;
-    padding: 0 0.5rem;
-    font-size: 0.875rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background-color: var(--color-surface);
+    padding-inline: 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
     color: var(--color-text);
     outline: none;
+    transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 .toolbar-select:hover {
-    background-color: var(--color-background);
+    border-color: var(--color-primary-300);
+    background-color: var(--color-primary-50);
 }
 
 .toolbar-select:focus {
+    border-color: var(--color-primary-400);
     outline: none;
     box-shadow: none;
 }
@@ -261,7 +303,6 @@ const setHeading = (value) => {
     min-height: 260px;
     padding: 1rem;
     outline: none;
-
     font-size: 0.875rem;
     line-height: 1.9;
     color: var(--color-text);
@@ -316,13 +357,13 @@ const setHeading = (value) => {
     margin: 1rem 0;
     padding: 0.75rem 1rem;
     border-right: 3px solid var(--color-primary-400);
-    border-radius: 0.375rem;
-    background: var(--color-muted);
+    border-radius: 0.5rem;
+    background: var(--color-primary-50);
 }
 
 :deep(.ProseMirror code) {
-    border-radius: 0.25rem;
-    background: var(--color-muted);
+    border-radius: 0.375rem;
+    background: var(--color-primary-50);
     padding: 0.15rem 0.35rem;
     font-family: monospace;
     font-size: 0.85em;
@@ -341,6 +382,6 @@ const setHeading = (value) => {
     float: right;
     height: 0;
     pointer-events: none;
-    color: #9ca3af;
+    color: var(--color-muted);
 }
 </style>
