@@ -18,21 +18,51 @@
                 </FormField>
 
                 <FormField label="واحد" :error="errors.unit">
-                    <input v-model="form.unit" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                    <select v-model="form.unit" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
                         focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.unit ? ' border-danger focus:border-danger' : ''" />
+                        :class="errors.unit ? ' border-danger focus:border-danger' : ''">
+                        <option v-for="unit in ProductUnitOptions" :key="unit.value" :value="unit.value">
+                            {{ unit.label }}
+                        </option>
+                    </select>
+
                 </FormField>
 
-                <FormField label="قیمت واحد" :error="errors.base_amount_per_unit">
-                    <input v-model="form.base_amount_per_unit" type="text" dir="ltr" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-                        focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.base_amount_per_unit ? ' border-danger focus:border-danger' : ''" />
+                <FormField label="قیمت واحد(تومان)" :error="errors.base_amount_per_unit">
+                    <input :value="tools.formatNumber(form.base_amount_per_unit)" type="text" dir="ltr" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+      focus:outline-none focus:border-primary-400 transition-colors"
+                        :class="errors.base_amount_per_unit ? 'border-danger focus:border-danger' : ''"
+                        @input="form.base_amount_per_unit = tools.unformatNumber($event.target.value)" />
                 </FormField>
 
-                <FormField label="دسته بندی" :error="errors.category">
-                    <input v-model="form.category" type="text" dir="auto" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
-                        focus:outline-none focus:border-primary-400 transition-colors"
-                        :class="errors.category ? ' border-danger focus:border-danger' : ''" />
+                <FormField label="دسته بندی" :error="errors.category_id">
+                    <select v-model="form.category_id" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors">
+                        <option disabled value="">انتخاب دسته</option>
+                        <option v-for="(category, index) in categoryStore.categoriesSimple" :value="category.id"
+                            :key="index" :class="errors.category ? ' border-danger focus:border-danger' : ''">
+                            {{ category.title }}</option>
+                    </select>
+
+                </FormField>
+                <FormField label="کلید واژه ها">
+                    <Select2 class="w-full rounded-lg border border-border bg-background" v-model="form.keywords"
+                        url="api/admin/keyword" label="title" value="id" mode="tags"
+                        placeholder="کلید واژه ها را جستجو یا ایجاد کنید" :create-option="true"
+                        :close-on-select="false" />
+                </FormField>
+
+                <FormField label="توضیحات سئو" :error="errors.meta_description" class="md:col-span-2">
+                    <textarea dir="auto" rows="3" v-model="form.meta_description" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors"></textarea>
+
+                </FormField>
+
+                <FormField label="توضیحات کامل" :error="errors.description" class="md:col-span-2">
+                    <!-- <textarea dir="auto" rows="3" v-model="form.description" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+    focus:outline-none focus:border-primary-400 transition-colors"></textarea> -->
+
+                    <RichTextEditor v-model="form.description"/>
                 </FormField>
 
             </div>
@@ -56,17 +86,31 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import FormField from '~/components/ui/FormField.vue'
+import { reactive, ref } from 'vue';
+import FormField from '~/components/ui/FormField.vue';
+import RichTextEditor from '~/components/admin/Partials/RichTextEditor.vue';
+import { useCategoryStore } from '#imports';
+import { useTools } from '#imports';
+import {
+    ProductUnit,
+    ProductUnitOptions,
+} from '~/enums/productUnit';
+import Select2 from '~/components/admin/Partials/Select2.vue';
 
 const { post } = useApi()
 const router = useRouter()
+const categoryStore = useCategoryStore();
+const tools = useTools()
 
 const form = reactive({
     title: '',
-    unit: '',
+    unit: ProductUnit.GRAM,
     base_amount_per_unit: '',
-    category: '',
+    category_id: '',
+    keywords: [],
+    meta_description: '',
+    description: '',
+
 })
 
 const errors = ref({})
@@ -79,10 +123,11 @@ const submit = async () => {
     generalError.value = ''
 
     try {
+
         const response = await post('/api/admin/product', form)
 
         if (response.status) {
-            router.push('/admin/product')
+            router.push('/admin/products')
         }
     } catch (error) {
         const validationErrors = error?.data?.error?.errors
@@ -100,5 +145,8 @@ const submit = async () => {
 definePageMeta({
     layout: 'admin',
     middleware: ['auth', 'admin'],
+})
+onMounted(async () => {
+    await categoryStore.fetchCategorySimpleList();
 })
 </script>
