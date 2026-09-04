@@ -24,7 +24,32 @@ function mapRestrictionError(error, preset) {
 }
 
 function mapUploadError(error) {
+  const xhr = error?.request
   const message = error?.message || ''
+
+  if (xhr?.status === 0) {
+    return 'خطا در ارتباط با سرور. اتصال اینترنت، آدرس API (BASE_URL) و CORS را بررسی کنید.'
+  }
+
+  if (xhr?.status === 401) {
+    return 'احراز هویت ناموفق بود. لطفاً دوباره وارد شوید.'
+  }
+
+  if (xhr?.status === 419) {
+    return 'نشست منقضی شده است. صفحه را رفرش کنید و دوباره تلاش کنید.'
+  }
+
+  if (xhr?.status === 422) {
+    try {
+      const body = JSON.parse(xhr?.responseText || '{}')
+      const firstError = Object.values(body?.error?.errors || {})[0]
+      if (Array.isArray(firstError) && firstError[0]) {
+        return firstError[0]
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }
 
   if (message.includes('network error') || message.includes('internet provider')) {
     return 'خطا در ارتباط با سرور. اتصال اینترنت، آدرس API (BASE_URL) و CORS را بررسی کنید.'
@@ -58,6 +83,10 @@ export function useUppyUploader(options) {
     preset,
     multiple = false,
     autoUpload = true,
+    endpoint = null,
+    maxNumberOfFiles = null,
+    uploadMeta = null,
+    allowedMetaFields = ['purpose'],
     onUploaded,
     onError,
     onRemoved,
@@ -75,8 +104,8 @@ export function useUppyUploader(options) {
   const errorMessage = ref(null)
   const isDragging = ref(false)
 
-  const maxFiles = multiple ? preset.maxNumberOfFiles : 1
-  const uploadEndpoint = resolveUploadEndpoint(config.public.baseUrl)
+  const maxFiles = maxNumberOfFiles ?? (multiple ? preset.maxNumberOfFiles : 1)
+  const uploadEndpoint = endpoint || resolveUploadEndpoint(config.public.baseUrl)
 
   const csrf = () => $api('/sanctum/csrf-cookie')
 
@@ -91,6 +120,11 @@ export function useUppyUploader(options) {
   }
 
   const previewCache = new Map()
+
+  const buildFileMeta = () => ({
+    purpose: preset.id,
+    ...(uploadMeta?.value || uploadMeta || {}),
+  })
 
   const syncFilesFromUppy = () => {
     if (!uppy.value) {
@@ -151,7 +185,7 @@ export function useUppyUploader(options) {
           name: rawFile.name,
           type: rawFile.type,
           data: rawFile,
-          meta: { purpose: preset.id },
+          meta: buildFileMeta(),
         })
       } catch (error) {
         errorMessage.value = mapRestrictionError(error, preset)
@@ -233,7 +267,7 @@ export function useUppyUploader(options) {
       formData: true,
       bundle: false,
       withCredentials: true,
-      allowedMetaFields: ['purpose'],
+      allowedMetaFields,
       headers: () => getUploadHeaders(),
       getResponseData: (xhr) => parseUploadResponse(xhr.responseText),
       getResponseError: (_responseText, xhr) => {
@@ -247,7 +281,7 @@ export function useUppyUploader(options) {
     })
 
     instance.on('file-added', (file) => {
-      instance.setFileMeta(file.id, { purpose: preset.id })
+      instance.setFileMeta(file.id, buildFileMeta())
       syncFilesFromUppy()
       onFileAdded?.(file)
     })

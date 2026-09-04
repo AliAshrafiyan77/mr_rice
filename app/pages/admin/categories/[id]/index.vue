@@ -42,11 +42,11 @@
                 </div>
 
                 <FormField label="تصویر دسته بندی" :error="errors.filename">
-                    <FileUploader
-                        purpose="image"
+                    <UppyImageUploader
+                        upload-type="category"
+                        :entity-id="categoryId"
                         v-model="categoryImage"
-                        :existing-image-url="existingImageUrl"
-                        :existing-image-path="existingImagePath"
+                        :existing-images="existingImages"
                         @error="onUploadError"
                         @removed="onImageRemoved"
                     />
@@ -78,7 +78,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import FormField from '~/components/ui/FormField.vue'
-import FileUploader from '~/components/admin/Partials/FileUploader.vue'
+import UppyImageUploader from '~/components/admin/Partials/UppyImageUploader.vue'
 import { useCategoryStore } from '#imports';
 
 const { put } = useApi()
@@ -94,8 +94,7 @@ const form = reactive({
 })
 
 const categoryImage = ref(null)
-const existingImageUrl = ref('')
-const existingImagePath = ref('')
+const existingImages = ref([])
 const existingStoredName = ref('')
 const imageRemoved = ref(false)
 const uploadError = ref('')
@@ -109,18 +108,15 @@ const onUploadError = (message) => {
     uploadError.value = message
 }
 
-const onImageRemoved = (payload) => {
-    if (payload?.source === 'existing') {
-        imageRemoved.value = true
-        existingImageUrl.value = ''
-        existingImagePath.value = ''
-        existingStoredName.value = ''
-    }
+const onImageRemoved = () => {
+    imageRemoved.value = true
+    existingStoredName.value = ''
+    existingImages.value = []
 }
 
 const resolveFilename = () => {
-    if (categoryImage.value?.stored_name) {
-        return categoryImage.value.stored_name
+    if (categoryImage.value?.filename || categoryImage.value?.stored_name) {
+        return categoryImage.value.filename || categoryImage.value.stored_name
     }
 
     if (imageRemoved.value) {
@@ -172,11 +168,16 @@ onMounted(async () => {
     form.en_title = categoryStore.category.en_title
     form.parent_id = categoryStore.category.parent_id
     form.description = categoryStore.category.description
-    existingImageUrl.value = categoryStore.category.filename || ''
     existingStoredName.value = categoryStore.category.stored_name || ''
-    existingImagePath.value = existingStoredName.value
-        ? `uploads/image/${existingStoredName.value}`
-        : ''
+    existingImages.value = existingStoredName.value
+        ? [{
+            url: categoryStore.category.filename,
+            filename: existingStoredName.value,
+            path: existingStoredName.value.includes('/')
+                ? `uploads/${existingStoredName.value}`
+                : `uploads/image/${existingStoredName.value}`,
+        }]
+        : []
     
     await categoryStore.fetchCategorySimpleList();
 })

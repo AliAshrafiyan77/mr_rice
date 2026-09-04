@@ -42,8 +42,8 @@
                 </div>
 
                 <FormField label="تصویر دسته بندی" :error="errors.filename">
-                    <FileUploader
-                        purpose="image"
+                    <UppyImageUploader
+                        upload-type="category"
                         v-model="categoryImage"
                         @error="onUploadError"
                     />
@@ -75,7 +75,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import FormField from '~/components/ui/FormField.vue'
-import FileUploader from '~/components/admin/Partials/FileUploader.vue'
+import UppyImageUploader from '~/components/admin/Partials/UppyImageUploader.vue'
 import { useCategoryStore } from '#imports';
 
 const { post } = useApi()
@@ -108,7 +108,7 @@ const submit = async () => {
 
     const payload = {
         ...form,
-        filename: categoryImage.value?.stored_name || null,
+        filename: categoryImage.value?.filename || categoryImage.value?.stored_name || null,
     }
 
     try {
