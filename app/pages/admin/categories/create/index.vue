@@ -24,6 +24,12 @@
                             :class="errors.en_title ? ' border-danger focus:border-danger' : ''" />
                     </FormField>
 
+                    <FormField label="عنوان متا" :error="errors.meta_title">
+                        <input v-model="form.meta_title" type="text" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
+                        focus:outline-none focus:border-primary-400 transition-colors"
+                            :class="errors.meta_title ? ' border-danger focus:border-danger' : ''" />
+                    </FormField>
+
                     <FormField label="دسته بندی والد" :error="errors.parent_id">
                         <select v-model="form.parent_id" class="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm text-text
     focus:outline-none focus:border-primary-400 transition-colors">
@@ -85,6 +91,7 @@ const categoryStore = useCategoryStore()
 const form = reactive({
     title: '',
     parent_id: '',
+    meta_title:'',
     description: '',
     en_title:'',
 })
