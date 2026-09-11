@@ -1,5 +1,24 @@
 <script setup lang="ts">
 import { HERO_BAG_URL, heroSpecs } from '~/data/homepage'
+
+interface FeaturedProduct {
+  id?: number
+  title?: string
+  subtitle?: string
+  image?: string | null
+  packaging_label?: string
+  price_label?: string
+}
+
+const props = defineProps<{
+  featuredProduct?: FeaturedProduct | null
+}>()
+
+const productImage = computed(() => props.featuredProduct?.image || HERO_BAG_URL)
+const productTitle = computed(() => props.featuredProduct?.title || '')
+const productSubtitle = computed(() => props.featuredProduct?.subtitle || 'کیسه کتان دست‌دوز با هوابندی دولایه')
+const packagingLabel = computed(() => props.featuredProduct?.packaging_label || 'بسته‌بندی ۱۰ کیلوگرمی')
+const priceLabel = computed(() => props.featuredProduct?.price_label || '')
 </script>
 
 <template>
@@ -59,7 +78,7 @@ import { HERO_BAG_URL, heroSpecs } from '~/data/homepage'
         </div>
       </div>
 
-      <div class="relative flex items-center justify-center lg:col-span-5">
+      <div v-if="featuredProduct" class="relative flex items-center justify-center lg:col-span-5">
         <div class="absolute -inset-4 -z-10 rounded-full bg-gradient-to-tr from-secondary-500/15 via-primary-200/20 to-transparent blur-2xl lg:opacity-70" />
         <div class="relative w-full max-w-md rounded-xl bg-surface p-4 shadow-md md:p-7">
           <div class="flex items-center justify-between pb-2">
@@ -72,8 +91,8 @@ import { HERO_BAG_URL, heroSpecs } from '~/data/homepage'
 
           <div class="relative my-2 flex h-48 w-full items-center justify-center overflow-hidden rounded-xl bg-primary-50/60 md:h-[380px]">
             <img
-              :src="HERO_BAG_URL"
-              alt="کیسه نفیس ۱۰ کیلوگرمی برنج طارم هاشمی مستر رایس"
+              :src="productImage"
+              :alt="productTitle"
               class="h-full w-auto object-contain transition-transform duration-500 hover:scale-105"
             />
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface/60 via-transparent to-transparent" />
@@ -81,12 +100,12 @@ import { HERO_BAG_URL, heroSpecs } from '~/data/homepage'
 
           <div class="flex items-center justify-between pt-1">
             <div class="text-right">
-              <h3 class="text-sm font-semibold text-primary-600 md:text-xl">طارم هاشمی ممتاز دانه بلند</h3>
-              <p class="text-[11px] text-muted md:text-sm">کیسه کتان دست‌دوز با هوابندی دولایه</p>
+              <h3 class="text-sm font-semibold text-primary-600 md:text-xl">{{ productTitle }}</h3>
+              <p class="text-[11px] text-muted md:text-sm">{{ productSubtitle }}</p>
             </div>
-            <div class="text-left">
-              <span class="block text-[10px] text-muted md:text-xs">بسته‌بندی ۱۰ کیلوگرمی</span>
-              <span class="text-sm font-semibold text-secondary-800 md:text-xl">۱,۹۵۰,۰۰۰ تومان</span>
+            <div v-if="priceLabel" class="text-left">
+              <span class="block text-[10px] text-muted md:text-xs">{{ packagingLabel }}</span>
+              <span class="text-sm font-semibold text-secondary-800 md:text-xl">{{ priceLabel }}</span>
             </div>
           </div>
 

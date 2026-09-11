@@ -109,24 +109,62 @@ const props = defineProps({
         type: String,
         default: 'label',
     },
+
+    extraParams: {
+        type: Object,
+        default: () => ({}),
+    },
+
+    selectedOptions: {
+        type: Array,
+        default: () => [],
+    },
+
+    max: {
+        type: Number,
+        default: null,
+    },
 })
 
 const emit = defineEmits([
     'update:modelValue',
+    'update:selectedItems',
+    'update:selectedItem',
 ])
 
 const { get } = useApi()
 
-const usesObjectMode = computed(() => props.mode === 'tags')
+const usesObjectMode = computed(() => props.mode === 'tags' || props.mode === 'single')
+
+function findSelectedOption(item) {
+    const rawValue = typeof item === 'object' && item !== null
+        ? (item.value ?? item[props.value])
+        : item
+
+    return props.selectedOptions.find((option) => {
+        const optionValue = option.value ?? option[props.value] ?? option.id
+
+        return String(optionValue) === String(rawValue)
+    })
+}
 
 function toOptionItem(item) {
     if (typeof item === 'object' && item !== null) {
-        const optionValue = item.value ?? item[props.value] ?? item[props.label] ?? item.label
-        const optionLabel = item.label ?? item[props.label] ?? String(optionValue ?? '')
+        const optionValue = item.value ?? item[props.value] ?? item.id ?? item[props.label] ?? item.label
+        const optionLabel = item.label ?? item[props.label] ?? item.title ?? String(optionValue ?? '')
 
         return {
             value: optionValue,
             label: optionLabel,
+        }
+    }
+
+    const matched = findSelectedOption(item)
+
+    if (matched) {
+        return {
+            value: matched.value ?? matched[props.value] ?? matched.id,
+            label: matched.label ?? matched[props.label] ?? matched.title ?? String(item),
         }
     }
 
@@ -138,7 +176,11 @@ function toOptionItem(item) {
 
 function toInternalValue(value) {
     if (props.mode !== 'tags') {
-        return value
+        if (value === null || value === undefined || value === '') {
+            return value
+        }
+
+        return toOptionItem(value)
     }
 
     if (!value) {
@@ -160,7 +202,29 @@ function toInternalValue(value) {
 }
 
 function toExternalValue(value) {
-    if (!usesObjectMode.value) {
+    if (props.mode === 'single') {
+        if (value === null || value === undefined || value === '') {
+            return null
+        }
+
+        if (typeof value === 'object') {
+            const raw = value.value ?? value[props.value] ?? value.id ?? null
+
+            if (raw === null || raw === undefined || raw === '') {
+                return null
+            }
+
+            const numeric = Number(raw)
+
+            return Number.isNaN(numeric) ? raw : numeric
+        }
+
+        const numeric = Number(value)
+
+        return Number.isNaN(numeric) ? value : numeric
+    }
+
+    if (props.mode !== 'tags') {
         return value
     }
 
@@ -171,7 +235,10 @@ function toExternalValue(value) {
     return value.map((item) => {
         if (typeof item === 'object' && item !== null) {
             if (props.emitField === 'value') {
-                return item.value
+                const raw = item.value ?? item[props.value] ?? item.id
+                const numeric = Number(raw)
+
+                return Number.isNaN(numeric) ? raw : numeric
             }
 
             return item.label ?? item.value
@@ -213,7 +280,31 @@ const internalValue = computed({
     get: () => toInternalValue(props.modelValue),
 
     set: (newValue) => {
-        emit('update:modelValue', toExternalValue(newValue))
+        let nextValue = newValue
+
+        if (props.mode === 'tags' && props.max && Array.isArray(newValue)) {
+            nextValue = newValue.slice(0, props.max)
+        }
+
+        emit('update:modelValue', toExternalValue(nextValue))
+
+        if (props.mode === 'tags' && Array.isArray(nextValue)) {
+            emit('update:selectedItems', nextValue.map((item) => ({
+                id: item.value ?? item[props.value],
+                label: item.label ?? item[props.label] ?? String(item.value ?? ''),
+            })))
+        }
+
+        if (props.mode === 'single') {
+            if (nextValue && typeof nextValue === 'object') {
+                emit('update:selectedItem', {
+                    id: nextValue.value ?? nextValue[props.value],
+                    label: nextValue.label ?? nextValue[props.label] ?? String(nextValue.value ?? ''),
+                })
+            } else {
+                emit('update:selectedItem', null)
+            }
+        }
     },
 })
 
@@ -223,8 +314,18 @@ const searchOptions = async (query) => {
     }
 
     try {
-        const url =
-            `${props.url}?${props.searchParam}=${encodeURIComponent(query)}&limit=${props.limit}`
+        const params = new URLSearchParams({
+            [props.searchParam]: query,
+            limit: String(props.limit),
+        })
+
+        Object.entries(props.extraParams ?? {}).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.set(key, String(value))
+            }
+        })
+
+        const url = `${props.url}?${params.toString()}`
 
         const response = await get(url)
         const data = response?.[props.responseKey] ?? []

@@ -103,6 +103,18 @@
                     </NuxtLink>
                 </li>
             </Submenu>
+
+            <Submenu title="تنظیمات" base-path="/admin/settings">
+                <li>
+                    <NuxtLink to="/admin/settings/home-page" active-class="bg-primary-600 text-white"
+                        exact-active-class="bg-primary-600 text-white"
+                        class="block px-4 py-2 rounded-lg text-primary-200 text-sm hover:bg-primary-600 hover:text-white transition-colors">
+                        تنظیمات صفحه اصلی
+                    </NuxtLink>
+                </li>
+                
+            </Submenu>
+          
         </ul>
     </aside>
 </template>
