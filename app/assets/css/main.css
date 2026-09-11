@@ -102,7 +102,16 @@
   --color-danger: #e53935;
 }
 body {
-  @apply bg-background text-text;
+  @apply bg-background text-text antialiased;
   direction: rtl;
   font-family: "Peyda", sans-serif;
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
