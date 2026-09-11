@@ -13,7 +13,7 @@
                     :disabled="!editor.can().chain().focus().undo().run()"
                     @click="editor.chain().focus().undo().run()"
                 >
-                    <UndoIcon class="h-4 w-4" />
+                    <UiIcon name="undo" class="h-4 w-4" />
                 </button>
 
                 <button
@@ -23,7 +23,7 @@
                     :disabled="!editor.can().chain().focus().redo().run()"
                     @click="editor.chain().focus().redo().run()"
                 >
-                    <RedoIcon class="h-4 w-4" />
+                    <UiIcon name="redo" class="h-4 w-4" />
                 </button>
             </div>
 
@@ -52,7 +52,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('bold') }"
                     @click="editor.chain().focus().toggleBold().run()"
                 >
-                    <BoldIcon class="h-4 w-4" />
+                    <UiIcon name="bold" class="h-4 w-4" />
                 </button>
 
                 <button
@@ -62,7 +62,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('italic') }"
                     @click="editor.chain().focus().toggleItalic().run()"
                 >
-                    <ItalicIcon class="h-4 w-4" />
+                    <UiIcon name="italic" class="h-4 w-4" />
                 </button>
 
                 <button
@@ -72,7 +72,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('strike') }"
                     @click="editor.chain().focus().toggleStrike().run()"
                 >
-                    <StrikethroughIcon class="h-4 w-4" />
+                    <UiIcon name="strikethrough" class="h-4 w-4" />
                 </button>
             </div>
 
@@ -86,7 +86,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('bulletList') }"
                     @click="editor.chain().focus().toggleBulletList().run()"
                 >
-                    <ListBulletIcon class="h-4 w-4" />
+                    <UiIcon name="list-bullet" class="h-4 w-4" />
                 </button>
 
                 <button
@@ -96,7 +96,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('orderedList') }"
                     @click="editor.chain().focus().toggleOrderedList().run()"
                 >
-                    <ListNumberedIcon class="h-4 w-4" />
+                    <UiIcon name="list-numbered" class="h-4 w-4" />
                 </button>
 
                 <button
@@ -106,7 +106,7 @@
                     :class="{ 'toolbar-btn-active': editor.isActive('blockquote') }"
                     @click="editor.chain().focus().toggleBlockquote().run()"
                 >
-                    <BlockquoteIcon class="h-4 w-4" />
+                    <UiIcon name="blockquote" class="h-4 w-4" />
                 </button>
             </div>
 
@@ -119,7 +119,7 @@
                     class="toolbar-btn"
                     @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
                 >
-                    <ClearFormattingIcon class="h-4 w-4" />
+                    <UiIcon name="clear-formatting" class="h-4 w-4" />
                 </button>
             </div>
         </div>
@@ -136,16 +136,6 @@
 import { computed, watch } from 'vue'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import UndoIcon from '~/components/icons/UndoIcon.vue'
-import RedoIcon from '~/components/icons/RedoIcon.vue'
-import BoldIcon from '~/components/icons/BoldIcon.vue'
-import ItalicIcon from '~/components/icons/ItalicIcon.vue'
-import StrikethroughIcon from '~/components/icons/StrikethroughIcon.vue'
-import ListBulletIcon from '~/components/icons/ListBulletIcon.vue'
-import ListNumberedIcon from '~/components/icons/ListNumberedIcon.vue'
-import BlockquoteIcon from '~/components/icons/BlockquoteIcon.vue'
-import ClearFormattingIcon from '~/components/icons/ClearFormattingIcon.vue'
-
 const props = defineProps({
     modelValue: {
         type: String,

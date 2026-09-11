@@ -4,9 +4,10 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   app:{
     head: {
-      title: 'Nuxt', // default fallback title
+      title: 'مستر رایس | برنج اصیل ایرانی',
       htmlAttrs: {
-        lang: 'en',
+        lang: 'fa',
+        dir: 'rtl',
       },
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.png' },

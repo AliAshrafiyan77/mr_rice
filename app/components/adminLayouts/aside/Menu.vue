@@ -1,7 +1,7 @@
 <template>
     <!-- Hamburger button -->
     <button v-if="showButton" class="lg:hidden fixed top-4 right-4 z-50 p-2 -mt-1" @click="openMenu">
-        <MenuIcon class="w-6 h-6 text-text" />
+        <UiIcon name="menu" class="w-6 h-6 text-text" />
     </button>
 
     <!-- Backdrop overlay -->
@@ -14,7 +14,7 @@
         <div class="px-4 py-5 border-b border-white/10 flex items-center justify-between">
             <h1 class="text-white font-bold text-lg">پنل مدیریت</h1>
             <button @click="closeMenu" class="lg:hidden p-2 rounded-lg">
-                <CloseIcon class="w-6 h-6 text-white" />
+                <UiIcon name="close" class="w-6 h-6 text-white" />
             </button>
         </div>
 
@@ -110,8 +110,6 @@
 <script setup>
 import { ref } from 'vue'
 import Submenu from './Submenu.vue'
-import MenuIcon from '~/components/icons/MenuIcon.vue'
-import CloseIcon from '~/components/icons/CloseIcon.vue'
 
 const isOpen = ref(false)
 const showButton = ref(true)

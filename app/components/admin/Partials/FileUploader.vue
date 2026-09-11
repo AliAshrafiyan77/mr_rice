@@ -25,7 +25,7 @@
         class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-600"
         aria-hidden="true"
       >
-        <UploadIcon class="h-6 w-6"/>
+        <UiIcon name="upload" class="h-6 w-6"/>
       </div>
 
       <div>
@@ -151,7 +151,6 @@
 <script setup>
 import { useFileUploaderPreset } from '~/composables/useFileUploaderPreset'
 import { useUppyUploader } from '~/composables/useUppyUploader'
-import UploadIcon from '~/components/icons/UploadIcon.vue'
 
 const props = defineProps({
   purpose: {
