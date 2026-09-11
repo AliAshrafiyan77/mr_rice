@@ -3,59 +3,36 @@ import { trustPillars } from '~/data/homepage'
 </script>
 
 <template>
-  <section id="trust" class="lg:py-0">
-    <!-- Mobile -->
-    <div class="space-y-3 rounded-2xl border border-border bg-primary-50/80 p-4 lg:hidden">
-      <div class="text-center">
-        <span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-secondary-500">منشور اعتماد</span>
-        <h2 class="text-base font-bold text-primary-900">تعهد کیفیت آتلیه مستر رایس</h2>
-      </div>
-      <div class="grid grid-cols-2 gap-2.5">
-        <div
-          v-for="pillar in trustPillars"
-          :key="pillar.title"
-          class="rounded-xl border border-border bg-surface p-3"
-        >
-          <div
-            class="mb-2 flex size-8 items-center justify-center rounded-lg"
-            :class="pillar.iconBg"
-          >
-            <UiMaterialIcon :name="pillar.icon" :size="18" />
-          </div>
-          <h4 class="mb-1 text-xs font-bold text-primary-900">{{ pillar.title }}</h4>
-          <p class="text-[10px] leading-relaxed text-muted">{{ pillar.description }}</p>
-        </div>
-      </div>
+  <HomeSection id="trust" band>
+    <div class="mx-auto mb-6 max-w-2xl text-center md:mb-12">
+      <span class="mb-1 block text-[10px] font-bold uppercase tracking-widest text-secondary-500 md:text-xs md:font-medium md:text-secondary-800">
+        سنجش و راستی‌آزمایی مستمر
+      </span>
+      <h2 class="text-base font-bold text-primary-900 md:text-3xl md:font-medium md:text-primary-600 lg:text-4xl">
+        منشور کیفیت و تعهد آتلیه مستر رایس
+      </h2>
+      <p class="mt-2 text-xs text-muted md:text-base">
+        چهار ستون استوار که کیفیت هر کیسه برنج و هر بسته حبوبات خروجی از آتلیه را تا سفره شما تضمین می‌کنند.
+      </p>
     </div>
 
-    <!-- Desktop -->
-    <div class="hidden bg-primary-200/60 py-12 lg:block">
-      <div class="mx-auto max-w-[1440px] px-5 md:px-16">
-        <div class="mx-auto mb-12 max-w-2xl text-center">
-          <span class="mb-1 block text-xs font-medium uppercase tracking-widest text-secondary-800">
-            سنجش و راستی‌آزمایی مستمر
-          </span>
-          <h2 class="mb-1 text-3xl font-medium text-primary-600 md:text-4xl">
-            منشور کیفیت و تعهد آتلیه مستر رایس
-          </h2>
-          <p class="text-base text-muted">
-            چهار ستون استوار که کیفیت هر کیسه برنج و هر بسته حبوبات خروجی از آتلیه را تا سفره شما تضمین می‌کنند.
-          </p>
+    <div class="grid grid-cols-2 gap-2.5 md:grid-cols-2 md:gap-10 lg:grid-cols-4">
+      <div
+        v-for="pillar in trustPillars"
+        :key="pillar.title"
+        class="flex flex-col rounded-xl border border-border bg-surface p-3 md:border-0 md:p-7 md:shadow-sm"
+      >
+        <div
+          class="mb-2 flex size-8 items-center justify-center rounded-lg md:mb-4 md:size-12"
+          :class="pillar.iconBg"
+        >
+          <UiMaterialIcon :name="pillar.icon" :size="18" class="md:text-[26px]" />
         </div>
-        <div class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
-          <div
-            v-for="pillar in trustPillars"
-            :key="pillar.title"
-            class="flex flex-col items-start rounded-xl bg-surface p-7 shadow-sm"
-          >
-            <div class="mb-4 flex size-12 items-center justify-center rounded-lg bg-primary-100 text-primary-600">
-              <UiMaterialIcon :name="pillar.icon" :size="26" />
-            </div>
-            <h3 class="mb-1 text-xl font-semibold text-primary-600">{{ pillar.title }}</h3>
-            <p class="text-sm leading-relaxed text-muted">{{ pillar.descriptionDesktop }}</p>
-          </div>
-        </div>
+        <h3 class="mb-1 text-xs font-bold text-primary-900 md:text-xl md:font-semibold md:text-primary-600">
+          {{ pillar.title }}
+        </h3>
+        <p class="text-[10px] leading-relaxed text-muted md:text-sm">{{ pillar.description }}</p>
       </div>
     </div>
-  </section>
+  </HomeSection>
 </template>
