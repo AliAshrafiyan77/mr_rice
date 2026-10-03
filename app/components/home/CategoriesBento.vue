@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { riceMicroSpecs } from '~/data/homepage'
 
+const { buildProductDetailPath } = useTools()
+
 interface RiceVariation {
   id: number
+  sku?: string
+  slug?: string
   label: string
   image?: string | null
   packaging_label?: string
@@ -12,6 +16,8 @@ interface RiceVariation {
 
 interface PillarProduct {
   id: number
+  sku?: string
+  slug?: string
   title: string
   image?: string | null
   price_label?: string
@@ -53,6 +59,12 @@ watch(riceVariations, (variants) => {
 function selectRice(variant: RiceVariation) {
   selectedRice.value = variant
 }
+
+function productLink(item?: { slug?: string; sku?: string } | null) {
+  return buildProductDetailPath(item?.slug, item?.sku)
+}
+
+const selectedRiceLink = computed(() => productLink(selectedRice.value))
 </script>
 
 <template>
@@ -147,7 +159,16 @@ function selectRice(variant: RiceVariation) {
                       {{ selectedRice.price_label }}
                     </span>
                   </div>
+                  <NuxtLink
+                    v-if="selectedRiceLink"
+                    :to="selectedRiceLink"
+                    class="flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white md:rounded md:px-4 md:py-1 md:hover:bg-primary-500"
+                  >
+                    <UiMaterialIcon name="add_shopping_cart" :size="14" class="md:text-[16px]" />
+                    <span>مشاهده محصول</span>
+                  </NuxtLink>
                   <button
+                    v-else
                     type="button"
                     class="flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white md:rounded md:px-4 md:py-1 md:hover:bg-primary-500"
                   >
@@ -196,10 +217,13 @@ function selectRice(variant: RiceVariation) {
               عدس قرمز صادراتی و نخود آبگوشتی کرمانشاه؛ زمان پخت کوتاه، بافتی لطیف و بدون ناخالصی.
             </p>
             <div v-if="pulseProducts.length" class="grid grid-cols-2 gap-2">
-              <div
+              <component
+                :is="productLink(item) ? 'NuxtLink' : 'div'"
                 v-for="item in pulseProducts"
                 :key="item.id"
+                :to="productLink(item) || undefined"
                 class="flex flex-col items-center rounded-xl bg-primary-50/70 p-2.5 text-center md:rounded-lg md:bg-primary-50/60 md:p-1"
+                :class="productLink(item) ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''"
               >
                 <div class="mb-1.5 flex h-24 w-full items-center justify-center md:mb-2 md:h-28 md:rounded md:bg-surface">
                   <img
@@ -216,7 +240,7 @@ function selectRice(variant: RiceVariation) {
                 >
                   {{ item.price_label }}
                 </span>
-              </div>
+              </component>
             </div>
           </div>
           <div class="mt-3 flex items-center justify-between pt-1 md:mt-4">
@@ -255,7 +279,13 @@ function selectRice(variant: RiceVariation) {
             <p class="mt-0.5 text-[11px] text-muted md:mb-4 md:mt-0 md:text-sm">
               دست‌چین باغات باستانی رفسنجان و تویسرکان با بسته‌بندی طلاکوب و وکیوم گاز نیتروژن جهت تضمین تازگی ترد.
             </p>
-            <div v-if="nutsProduct" class="mt-3 flex items-center justify-between rounded-lg bg-primary-50/70 p-3 md:mt-0 md:p-4">
+            <component
+              :is="productLink(nutsProduct) ? 'NuxtLink' : 'div'"
+              v-if="nutsProduct"
+              :to="productLink(nutsProduct) || undefined"
+              class="mt-3 flex items-center justify-between rounded-lg bg-primary-50/70 p-3 md:mt-0 md:p-4"
+              :class="productLink(nutsProduct) ? 'cursor-pointer transition-shadow hover:shadow-sm' : ''"
+            >
               <div class="flex items-center gap-2">
                 <div class="flex size-8 items-center justify-center rounded-full bg-secondary-200/50 text-secondary-800 md:size-10">
                   <UiMaterialIcon name="energy_savings_leaf" :size="20" class="md:text-[22px]" />
@@ -271,7 +301,7 @@ function selectRice(variant: RiceVariation) {
               >
                 {{ nutsProduct.price_label }}
               </span>
-            </div>
+            </component>
           </div>
           <div class="mt-3 flex items-center justify-between md:mt-4">
             <span class="text-[11px] text-muted md:text-sm">آماده‌سازی سفارشی در جعبه‌های چوبی</span>

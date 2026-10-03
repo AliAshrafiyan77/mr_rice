@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { normalizePublicHomePage } from '~/composables/usePublicHomePage'
+import { normalizePublicHomePage } from '~/utils/home/public-home-page'
 
 const PUBLIC_HOME_PAGE_ENDPOINT = '/api/home-page'
 

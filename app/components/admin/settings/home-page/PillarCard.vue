@@ -77,26 +77,26 @@
         v-if="pillar.type === 'parent_with_variations'"
         class="md:col-span-2"
         label="کالای موجود (محصول مادر)"
-        :error="errors?.product_inventory_id"
+        :error="errors?.product_variation_id"
       >
         <AdminSettingsHomePageInventorySearchSelect
-          v-model="pillar.product_inventory_id"
-          v-model:selected-inventory="parentInventoryPreview"
+          v-model="pillar.product_variation_id"
+          v-model:selected-variation="parentVariationPreview"
           :category-id="pillar.category_id"
           placeholder="نام کالا را جستجو کنید..."
-          @update:selected-inventory="onParentInventorySelected"
+          @update:selected-variation="onParentVariationSelected"
         />
       </FormField>
 
       <FormField
         v-else
         class="md:col-span-2"
-        :label="`کالاهای موجود (${pillar.product_inventory_ids?.length ?? 0} / ${pillar.max_products})`"
-        :error="errors?.product_inventory_ids"
+        :label="`کالاهای موجود (${pillar.product_variation_ids?.length ?? 0} / ${pillar.max_products})`"
+        :error="errors?.product_variation_ids"
       >
         <AdminSettingsHomePageInventoryMultiSelect
-          v-model="pillar.product_inventory_ids"
-          v-model:selected-inventories="pillar.inventories"
+          v-model="pillar.product_variation_ids"
+          v-model:selected-variations="pillar.product_variations"
           :category-id="pillar.category_id"
           :max="pillar.max_products"
           placeholder="کالاهای این رکن را جستجو و انتخاب کنید..."
@@ -128,18 +128,18 @@ defineEmits(['remove'])
 
 const categoryStore = useCategoryStore()
 
-const parentInventoryPreview = computed(() => {
-  if (props.pillar.inventories?.length) {
-    return props.pillar.inventories[0]
+const parentVariationPreview = computed(() => {
+  if (props.pillar.product_variations?.length) {
+    return props.pillar.product_variations[0]
   }
 
-  if (!props.pillar.product_inventory_id) {
+  if (!props.pillar.product_variation_id) {
     return null
   }
 
   return {
-    id: props.pillar.product_inventory_id,
-    label: `کالا #${props.pillar.product_inventory_id}`,
+    id: props.pillar.product_variation_id,
+    label: `کالا #${props.pillar.product_variation_id}`,
   }
 })
 
@@ -159,20 +159,20 @@ function onCategoryChange(categoryId) {
 function onTypeChange() {
   if (props.pillar.type === 'parent_with_variations') {
     props.pillar.max_products = 1
-    props.pillar.product_inventory_ids = []
-    props.pillar.inventories = []
+    props.pillar.product_variation_ids = []
+    props.pillar.product_variations = []
   } else {
-    props.pillar.product_inventory_id = null
-    props.pillar.inventories = []
+    props.pillar.product_variation_id = null
+    props.pillar.product_variations = []
   }
 }
 
-function onParentInventorySelected(inventory) {
-  if (!inventory) {
-    props.pillar.inventories = []
+function onParentVariationSelected(variation) {
+  if (!variation) {
+    props.pillar.product_variations = []
     return
   }
 
-  props.pillar.inventories = [inventory]
+  props.pillar.product_variations = [variation]
 }
 </script>

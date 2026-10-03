@@ -23,7 +23,7 @@
         :key="tab.key"
         :tab="tab"
         :label-error="errors[`selected_products.tabs.${index}.label`]"
-        :products-error="errors[`selected_products.tabs.${index}.product_inventory_ids`]"
+        :products-error="errors[`selected_products.tabs.${index}.product_variation_ids`]"
         :can-remove="section.tabs.length > 1"
         @remove="removeTab(index)"
       />
@@ -62,7 +62,7 @@
 import {
   SELECTED_PRODUCTS_SECTION_TITLE,
   createSelectedProductTab,
-} from '~/composables/useHomePageSettings'
+} from '~/utils/admin/home-page-settings'
 
 const props = defineProps({
   section: {

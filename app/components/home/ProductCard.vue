@@ -7,6 +7,7 @@ interface ProductCardData {
   origin?: string
   price: string
   image?: string
+  detailPath?: string | null
 }
 
 defineProps<{
@@ -15,8 +16,11 @@ defineProps<{
 </script>
 
 <template>
-  <article
+  <component
+    :is="product.detailPath ? 'NuxtLink' : 'article'"
+    :to="product.detailPath || undefined"
     class="group flex flex-col justify-between rounded-xl border border-border bg-surface p-2.5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md md:p-4"
+    :class="product.detailPath ? 'cursor-pointer' : ''"
   >
     <div>
       <div class="mb-1 flex items-center justify-between">
@@ -27,7 +31,12 @@ defineProps<{
         >
           {{ product.badge }}
         </span>
-        <button type="button" aria-label="پسندیدن" class="text-muted transition-colors hover:text-secondary-500">
+        <button
+          type="button"
+          aria-label="پسندیدن"
+          class="text-muted transition-colors hover:text-secondary-500"
+          @click.prevent
+        >
           <UiMaterialIcon name="favorite_border" :size="16" class="md:text-[20px]" />
         </button>
       </div>
@@ -53,14 +62,13 @@ defineProps<{
           <span class="block text-[9px] text-muted md:text-xs">قیمت با تضمین اصالت</span>
           <span class="text-xs font-bold text-primary-600 md:text-xl">{{ product.price }}</span>
         </div>
-        <button
-          type="button"
-          aria-label="افزودن به سبد خرید"
-          class="flex size-7 items-center justify-center rounded-lg bg-primary-900 text-white transition-colors active:scale-95 md:size-auto md:bg-primary-600 md:p-2 md:hover:bg-primary-500"
+        <span
+          class="flex size-7 items-center justify-center rounded-lg bg-primary-900 text-white transition-colors active:scale-95 md:size-auto md:bg-primary-600 md:p-2 md:group-hover:bg-primary-500"
+          aria-hidden="true"
         >
           <UiMaterialIcon name="shopping_bag" :size="15" class="md:text-[20px]" />
-        </button>
+        </span>
       </div>
     </div>
-  </article>
+  </component>
 </template>

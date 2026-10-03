@@ -1,4 +1,4 @@
-import { normalizeInventoryList } from '~/composables/useInventoryLabel'
+import { normalizeProductVariationList } from '~/utils/admin/product-variation-label'
 
 export const SELECTED_PRODUCTS_MAX = 6
 
@@ -15,8 +15,8 @@ function createTabFromDefaults({ key, label }) {
   return {
     key,
     label,
-    product_inventory_ids: [],
-    inventories: [],
+    product_variation_ids: [],
+    product_variations: [],
   }
 }
 
@@ -36,16 +36,16 @@ export function createPillar(category = null) {
     label: category?.title ?? 'رکن جدید',
     category_id: categoryId,
     max_products: 2,
-    product_inventory_id: null,
-    product_inventory_ids: [],
-    inventories: [],
+    product_variation_id: null,
+    product_variation_ids: [],
+    product_variations: [],
   }
 }
 
 export function createDefaultForm() {
   return {
-    featured_product_inventory_id: null,
-    featured_product_inventory: null,
+    featured_product_variation_id: null,
+    featured_product_variation: null,
     pillars: [],
     selected_products_section: {
       tabs: DEFAULT_SELECTED_PRODUCT_TABS.map(createTabFromDefaults),
@@ -56,19 +56,21 @@ export function createDefaultForm() {
 export function mapSettingsToForm(settings = {}) {
   const form = createDefaultForm()
 
-  const featured = normalizeInventoryList([
-    settings.featured_product_inventory ?? settings.featured_product_inventory_id,
+  const featured = normalizeProductVariationList([
+    settings.featured_product_variation ?? settings.featured_product_variation_id,
   ])[0]
 
-  form.featured_product_inventory_id = featured?.id ?? settings.featured_product_inventory_id ?? null
-  form.featured_product_inventory = featured ?? null
+  form.featured_product_variation_id = featured?.id ?? settings.featured_product_variation_id ?? null
+  form.featured_product_variation = featured ?? null
 
   if (Array.isArray(settings.pillars) && settings.pillars.length) {
     form.pillars = settings.pillars.map((pillar) => {
-      const inventories = normalizeInventoryList(pillar.inventories)
-      const inventoryIds = Array.isArray(pillar.product_inventory_ids) && pillar.product_inventory_ids.length
-        ? [...pillar.product_inventory_ids]
-        : inventories.map((item) => item.id)
+      const variations = normalizeProductVariationList(
+        pillar.product_variations ?? pillar.inventories,
+      )
+      const variationIds = Array.isArray(pillar.product_variation_ids) && pillar.product_variation_ids.length
+        ? [...pillar.product_variation_ids]
+        : variations.map((item) => item.id)
 
       return {
         key: pillar.key,
@@ -76,9 +78,9 @@ export function mapSettingsToForm(settings = {}) {
         label: pillar.label ?? '',
         category_id: pillar.category_id ?? null,
         max_products: pillar.max_products ?? (pillar.type === 'parent_with_variations' ? 1 : 2),
-        product_inventory_id: pillar.product_inventory_id ?? inventories[0]?.id ?? null,
-        product_inventory_ids: pillar.type === 'products' ? inventoryIds : [],
-        inventories,
+        product_variation_id: pillar.product_variation_id ?? variations[0]?.id ?? null,
+        product_variation_ids: pillar.type === 'products' ? variationIds : [],
+        product_variations: variations,
       }
     })
   }
@@ -89,13 +91,15 @@ export function mapSettingsToForm(settings = {}) {
     form.selected_products_section = {
       tabs: section.tabs.map((tab, index) => {
         const defaults = DEFAULT_SELECTED_PRODUCT_TABS[index]
-        const inventories = normalizeInventoryList(tab.inventories ?? tab.product_inventory_ids)
+        const variations = normalizeProductVariationList(
+          tab.product_variations ?? tab.inventories ?? tab.product_variation_ids,
+        )
 
         return {
           key: tab.key ?? defaults?.key ?? `tab_${index}`,
           label: tab.label ?? defaults?.label ?? '',
-          product_inventory_ids: inventories.map((item) => item.id),
-          inventories,
+          product_variation_ids: variations.map((item) => item.id),
+          product_variations: variations,
         }
       }),
     }
@@ -106,7 +110,7 @@ export function mapSettingsToForm(settings = {}) {
 
 export function buildSettingsPayload(form) {
   return {
-    featured_product_inventory_id: form.featured_product_inventory_id,
+    featured_product_variation_id: form.featured_product_variation_id,
     pillars: (form.pillars ?? []).map((pillar) => {
       const base = {
         key: pillar.key,
@@ -119,13 +123,13 @@ export function buildSettingsPayload(form) {
       if (pillar.type === 'parent_with_variations') {
         return {
           ...base,
-          product_inventory_id: pillar.product_inventory_id,
+          product_variation_id: pillar.product_variation_id,
         }
       }
 
       return {
         ...base,
-        product_inventory_ids: pillar.product_inventory_ids ?? [],
+        product_variation_ids: pillar.product_variation_ids ?? [],
       }
     }),
     selected_products_section: {
@@ -133,7 +137,7 @@ export function buildSettingsPayload(form) {
       tabs: (form.selected_products_section.tabs ?? []).map((tab) => ({
         key: tab.key,
         label: tab.label,
-        product_inventory_ids: tab.product_inventory_ids ?? [],
+        product_variation_ids: tab.product_variation_ids ?? [],
       })),
     },
   }
@@ -142,8 +146,8 @@ export function buildSettingsPayload(form) {
 export function validateHomePageSettings(form) {
   const errors = {}
 
-  if (!form.featured_product_inventory_id) {
-    errors.featured_product_inventory_id = 'کالای شاخص صفحه اصلی را انتخاب کنید.'
+  if (!form.featured_product_variation_id) {
+    errors.featured_product_variation_id = 'کالای شاخص صفحه اصلی را انتخاب کنید.'
   }
 
   const pillars = form.pillars ?? []
@@ -161,20 +165,20 @@ export function validateHomePageSettings(form) {
       errors[`pillars.${index}.label`] = 'عنوان رکن الزامی است.'
     }
 
-    if (pillar.type === 'parent_with_variations' && !pillar.product_inventory_id) {
-      errors[`pillars.${index}.product_inventory_id`] = 'یک کالا برای این رکن انتخاب کنید (بقیه وزن‌های محصول مادر خودکار نمایش داده می‌شوند).'
+    if (pillar.type === 'parent_with_variations' && !pillar.product_variation_id) {
+      errors[`pillars.${index}.product_variation_id`] = 'یک کالا برای این رکن انتخاب کنید (بقیه وزن‌های محصول مادر خودکار نمایش داده می‌شوند).'
     }
 
     if (pillar.type === 'products') {
-      const count = pillar.product_inventory_ids?.length ?? 0
+      const count = pillar.product_variation_ids?.length ?? 0
       const max = pillar.max_products ?? 2
 
       if (count === 0) {
-        errors[`pillars.${index}.product_inventory_ids`] = 'حداقل یک کالا برای این رکن انتخاب کنید.'
+        errors[`pillars.${index}.product_variation_ids`] = 'حداقل یک کالا برای این رکن انتخاب کنید.'
       }
 
       if (count > max) {
-        errors[`pillars.${index}.product_inventory_ids`] = `حداکثر ${max} کالا برای این رکن مجاز است.`
+        errors[`pillars.${index}.product_variation_ids`] = `حداکثر ${max} کالا برای این رکن مجاز است.`
       }
     }
   })
@@ -192,14 +196,14 @@ export function validateHomePageSettings(form) {
       errors[`selected_products.tabs.${index}.label`] = 'عنوان تب الزامی است.'
     }
 
-    const selectedCount = tab.product_inventory_ids?.length ?? 0
+    const selectedCount = tab.product_variation_ids?.length ?? 0
 
     if (selectedCount === 0) {
-      errors[`selected_products.tabs.${index}.product_inventory_ids`] = 'حداقل یک کالا برای این تب انتخاب کنید.'
+      errors[`selected_products.tabs.${index}.product_variation_ids`] = 'حداقل یک کالا برای این تب انتخاب کنید.'
     }
 
     if (selectedCount > SELECTED_PRODUCTS_MAX) {
-      errors[`selected_products.tabs.${index}.product_inventory_ids`] = `حداکثر ${SELECTED_PRODUCTS_MAX} کالا برای هر تب مجاز است.`
+      errors[`selected_products.tabs.${index}.product_variation_ids`] = `حداکثر ${SELECTED_PRODUCTS_MAX} کالا برای هر تب مجاز است.`
     }
   })
 

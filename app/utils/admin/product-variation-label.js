@@ -1,4 +1,4 @@
-export function formatInventoryLabel(item = {}) {
+export function formatProductVariationLabel(item = {}) {
   if (item.label) {
     return item.label
   }
@@ -15,7 +15,7 @@ export function formatInventoryLabel(item = {}) {
   return title
 }
 
-export function normalizeInventoryOption(item) {
+export function normalizeProductVariationOption(item) {
   if (!item) {
     return null
   }
@@ -30,7 +30,7 @@ export function normalizeInventoryOption(item) {
     return {
       id,
       title: item.title ?? item.label ?? String(id),
-      label: formatInventoryLabel(item),
+      label: formatProductVariationLabel(item),
       weight: item.weight ?? null,
       product_id: item.product_id ?? null,
       category_id: item.category_id ?? null,
@@ -40,10 +40,10 @@ export function normalizeInventoryOption(item) {
   return { id: item, title: String(item), label: String(item) }
 }
 
-export function normalizeInventoryList(items) {
+export function normalizeProductVariationList(items) {
   if (!Array.isArray(items)) {
     return []
   }
 
-  return items.map(normalizeInventoryOption).filter(Boolean)
+  return items.map(normalizeProductVariationOption).filter(Boolean)
 }

@@ -23,9 +23,9 @@
 
     <form v-else class="space-y-6" @submit.prevent="handleSubmit">
       <AdminSettingsHomePageFeaturedProductField
-        v-model="form.featured_product_inventory_id"
-        v-model:selected-inventory="form.featured_product_inventory"
-        :error="errors.featured_product_inventory_id"
+        v-model="form.featured_product_variation_id"
+        v-model:selected-variation="form.featured_product_variation"
+        :error="errors.featured_product_variation_id"
       />
 
       <AdminSettingsHomePageStorePillarsSection
@@ -77,7 +77,7 @@
 import {
   createDefaultForm,
   useHomePageSettingsForm,
-} from '~/composables/useHomePageSettings'
+} from '~/utils/admin/home-page-settings'
 
 definePageMeta({
   layout: 'admin',

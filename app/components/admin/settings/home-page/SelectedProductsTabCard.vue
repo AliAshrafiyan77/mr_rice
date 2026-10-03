@@ -28,8 +28,8 @@
 
     <FormField label="کالاهای این تب" :error="productsError">
       <AdminSettingsHomePageInventoryMultiSelect
-        v-model="tab.product_inventory_ids"
-        v-model:selected-inventories="tab.inventories"
+        v-model="tab.product_variation_ids"
+        v-model:selected-variations="tab.product_variations"
         :max="maxProducts"
         :placeholder="`کالاهای «${tab.label || 'این تب'}» را انتخاب کنید...`"
       />
@@ -39,7 +39,7 @@
 
 <script setup>
 import FormField from '~/components/ui/FormField.vue'
-import { SELECTED_PRODUCTS_MAX } from '~/composables/useHomePageSettings'
+import { SELECTED_PRODUCTS_MAX } from '~/utils/admin/home-page-settings'
 
 defineProps({
   tab: {

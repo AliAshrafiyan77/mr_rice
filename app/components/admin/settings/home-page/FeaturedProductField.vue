@@ -5,18 +5,18 @@
   >
     <FormField label="انتخاب کالای شاخص" :error="error">
       <AdminSettingsHomePageInventorySearchSelect
-        v-model="featuredInventoryId"
-        v-model:selected-inventory="featuredInventory"
+        v-model="featuredVariationId"
+        v-model:selected-variation="featuredVariation"
         placeholder="نام کالا را جستجو کنید..."
       />
     </FormField>
 
     <div
-      v-if="featuredInventory"
+      v-if="featuredVariation"
       class="mt-4 rounded-lg border border-border bg-background px-4 py-3 text-sm text-text"
     >
       <span class="text-muted">کالای انتخاب‌شده:</span>
-      <span class="mr-2 font-medium">{{ featuredInventory.label || featuredInventory.title }}</span>
+      <span class="mr-2 font-medium">{{ featuredVariation.label || featuredVariation.title }}</span>
     </div>
   </AdminSettingsHomePageSettingsSection>
 </template>
@@ -29,7 +29,7 @@ const props = defineProps({
     type: [Number, String, null],
     default: null,
   },
-  selectedInventory: {
+  selectedVariation: {
     type: Object,
     default: null,
   },
@@ -39,9 +39,9 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'update:selectedInventory'])
+const emit = defineEmits(['update:modelValue', 'update:selectedVariation'])
 
-const featuredInventoryId = computed({
+const featuredVariationId = computed({
   get() {
     return props.modelValue
   },
@@ -50,12 +50,12 @@ const featuredInventoryId = computed({
   },
 })
 
-const featuredInventory = computed({
+const featuredVariation = computed({
   get() {
-    return props.selectedInventory
+    return props.selectedVariation
   },
   set(value) {
-    emit('update:selectedInventory', value)
+    emit('update:selectedVariation', value)
   },
 })
 </script>

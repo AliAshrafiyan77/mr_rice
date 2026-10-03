@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mapApiProductToCard } from '~/composables/usePublicHomePage'
+import { mapApiProductToCard } from '~/utils/home/public-home-page'
 
 interface TabProduct {
   id: number

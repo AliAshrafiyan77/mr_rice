@@ -2,8 +2,8 @@
   <Select2
     :model-value="modelValue"
     class="w-full rounded-lg border border-border bg-background"
-    url="/api/admin/product-inventory/search"
-    response-key="product_inventories"
+    url="/api/admin/product-variation/search"
+    response-key="product_variations"
     search-param="title"
     label="label"
     value="id"
@@ -22,14 +22,14 @@
 
 <script setup>
 import Select2 from '~/components/admin/Partials/Select2.vue'
-import { formatInventoryLabel, normalizeInventoryOption } from '~/composables/useInventoryLabel'
+import { formatProductVariationLabel, normalizeProductVariationOption } from '~/utils/admin/product-variation-label'
 
 const props = defineProps({
   modelValue: {
     type: [Number, String, null],
     default: null,
   },
-  selectedInventory: {
+  selectedVariation: {
     type: Object,
     default: null,
   },
@@ -47,7 +47,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue', 'update:selectedInventory'])
+const emit = defineEmits(['update:modelValue', 'update:selectedVariation'])
 
 const extraParams = computed(() => {
   if (!props.categoryId) {
@@ -58,7 +58,7 @@ const extraParams = computed(() => {
 })
 
 const selectedOptions = computed(() => {
-  const item = normalizeInventoryOption(props.selectedInventory)
+  const item = normalizeProductVariationOption(props.selectedVariation)
 
   if (!item) {
     return []
@@ -66,7 +66,7 @@ const selectedOptions = computed(() => {
 
   return [{
     id: item.id,
-    label: formatInventoryLabel(item),
+    label: formatProductVariationLabel(item),
   }]
 })
 
@@ -75,6 +75,6 @@ function onIdChange(value) {
 }
 
 function onSelectedItemChange(item) {
-  emit('update:selectedInventory', item ?? null)
+  emit('update:selectedVariation', item ?? null)
 }
 </script>

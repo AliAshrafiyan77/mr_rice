@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { HERO_BAG_URL, heroSpecs } from '~/data/homepage'
 
+const { buildProductDetailPath } = useTools()
+
 interface FeaturedProduct {
   id?: number
+  sku?: string
+  slug?: string
   title?: string
   subtitle?: string
   image?: string | null
@@ -19,6 +23,9 @@ const productTitle = computed(() => props.featuredProduct?.title || '')
 const productSubtitle = computed(() => props.featuredProduct?.subtitle || 'کیسه کتان دست‌دوز با هوابندی دولایه')
 const packagingLabel = computed(() => props.featuredProduct?.packaging_label || 'بسته‌بندی ۱۰ کیلوگرمی')
 const priceLabel = computed(() => props.featuredProduct?.price_label || '')
+const featuredDetailPath = computed(() =>
+  buildProductDetailPath(props.featuredProduct?.slug, props.featuredProduct?.sku),
+)
 </script>
 
 <template>
@@ -80,7 +87,12 @@ const priceLabel = computed(() => props.featuredProduct?.price_label || '')
 
       <div v-if="featuredProduct" class="relative flex items-center justify-center lg:col-span-5">
         <div class="absolute -inset-4 -z-10 rounded-full bg-gradient-to-tr from-secondary-500/15 via-primary-200/20 to-transparent blur-2xl lg:opacity-70" />
-        <div class="relative w-full max-w-md rounded-xl bg-surface p-4 shadow-md md:p-7">
+        <component
+          :is="featuredDetailPath ? 'NuxtLink' : 'div'"
+          :to="featuredDetailPath || undefined"
+          class="relative w-full max-w-md rounded-xl bg-surface p-4 shadow-md transition-shadow hover:shadow-lg md:p-7"
+          :class="featuredDetailPath ? 'cursor-pointer' : ''"
+        >
           <div class="flex items-center justify-between pb-2">
             <div class="flex items-center gap-1">
               <UiMaterialIcon name="verified" :size="20" class="text-secondary-800" />
@@ -117,7 +129,7 @@ const priceLabel = computed(() => props.featuredProduct?.price_label || '')
             <UiMaterialIcon name="workspace_premium" :size="16" class="text-secondary-200 md:text-[18px]" />
             <span class="text-[10px] md:text-xs">معطر و پاک‌سازی‌شده با لیزر</span>
           </div>
-        </div>
+        </component>
       </div>
     </div>
   </HomeSection>

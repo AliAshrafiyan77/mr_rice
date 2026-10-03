@@ -29,7 +29,7 @@
 
 <script setup>
 import CategoryTreeItem from '~/components/admin/categories/CategoryTreeItem.vue'
-import { buildCategoryTree } from '~/composables/useCategoryTree'
+import { buildCategoryTree } from '~/utils/admin/category-tree'
 import { useCategoryStore } from '#imports'
 
 const categoryStore = useCategoryStore()

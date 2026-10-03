@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { createPillar } from '~/composables/useHomePageSettings'
+import { createPillar } from '~/utils/admin/home-page-settings'
 
 const props = defineProps({
   pillars: {
@@ -49,8 +49,8 @@ function pillarErrors(index) {
   return {
     category_id: props.errors[`pillars.${index}.category_id`],
     label: props.errors[`pillars.${index}.label`],
-    product_inventory_id: props.errors[`pillars.${index}.product_inventory_id`],
-    product_inventory_ids: props.errors[`pillars.${index}.product_inventory_ids`],
+    product_variation_id: props.errors[`pillars.${index}.product_variation_id`],
+    product_variation_ids: props.errors[`pillars.${index}.product_variation_ids`],
   }
 }
 

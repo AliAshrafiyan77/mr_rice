@@ -1,12 +1,20 @@
+import { buildProductDetailPath, resolveBackendAssetUrl } from '~/composables/useTools'
+
 export function mapApiProductToCard(product = {}) {
+  const slug = product.slug ?? null
+  const sku = product.sku ?? null
+
   return {
     id: product.id,
     title: product.title ?? '',
-    image: product.image ?? '',
+    image: resolveBackendAssetUrl(product.image ?? ''),
     price: product.price_label ?? product.price ?? '',
     origin: product.origin ?? '',
     badge: product.badge ?? 'مستر رایس',
     badgeClass: product.badge_class ?? 'bg-primary-200/80 text-primary-900',
+    slug,
+    sku,
+    detailPath: buildProductDetailPath(slug, sku),
   }
 }
 
@@ -20,34 +28,5 @@ export function normalizePublicHomePage(response = {}) {
       title: 'محصولات منتخب آتلیه مستر رایس',
       tabs: [],
     },
-  }
-}
-
-export function findPillarByKey(pillars, key) {
-  if (!Array.isArray(pillars)) {
-    return null
-  }
-
-  return pillars.find((pillar) => pillar.key === key) ?? null
-}
-
-export function usePublicHomePage() {
-  const { get } = useApi()
-
-  async function fetchHomePage() {
-    const response = await get('/api/home-page')
-
-    if (!response?.status) {
-      return normalizePublicHomePage()
-    }
-
-    return normalizePublicHomePage(response)
-  }
-
-  return {
-    fetchHomePage,
-    mapApiProductToCard,
-    normalizePublicHomePage,
-    findPillarByKey,
   }
 }
